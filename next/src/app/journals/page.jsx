@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
+import { FileText, Mic, Square, X } from "lucide-react";
 
 function JournalsPage() {
   const [journals, setJournals] = useState([]);
@@ -18,6 +19,7 @@ function JournalsPage() {
   const [journalToDelete, setJournalToDelete] = useState(null);
   const [isRecording, setIsRecording] = useState(false);
   const [recognition, setRecognition] = useState(null);
+  const [sortOrder, setSortOrder] = useState("latest");
   const fetchJournals = async () => {
     try {
       const token = localStorage.getItem("token");
@@ -33,6 +35,14 @@ function JournalsPage() {
   useEffect(() => {
     fetchJournals();
   }, []);
+
+  const sortJournals = (list, order) => {
+    return [...list].sort((a, b) => {
+      const dateA = new Date(a.createdAt);
+      const dateB = new Date(b.createdAt);
+      return order === "latest" ? dateB - dateA : dateA - dateB;
+    });
+  };
 
   const validate = () => {
     const newErrors = {};
@@ -97,17 +107,30 @@ function JournalsPage() {
     recognizer.maxAlternatives = 1;
 
     recognizer.onstart = () => setIsRecording(true);
-    recognizer.onend = () => setIsRecording(false);
-
-    recognizer.onresult = (event) => {
-      const transcript = event.results[0][0].transcript;
-      setBody((prev) => prev + " " + transcript);
+    recognizer.onend = () => {
+      setIsRecording(false);
+      setRecognition(null);
     };
 
-    recognizer.onerror = (e) => {
-      console.error("Recognition error:", e);
-      alert("Speech recognition failed.");
+    recognizer.onresult = (event) => {
+      const transcript = event.results[0][0]?.transcript?.trim();
+      if (transcript) {
+        setBody((prev) => prev + " " + transcript);
+      }
+    };
+
+    recognizer.onerror = (event) => {
+      console.warn("Speech recognition error:", event.error);
+      // Only show an alert for actual unexpected errors
+      if (
+        event.error !== "no-speech" &&
+        event.error !== "aborted" &&
+        event.error !== "not-allowed"
+      ) {
+        alert("Speech recognition failed.");
+      }
       setIsRecording(false);
+      setRecognition(null);
     };
 
     recognizer.start();
@@ -284,8 +307,9 @@ function JournalsPage() {
                         <button
                           type="button"
                           onClick={startVoiceInput}
-                          className="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700"
+                          className="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700 flex items-center gap-2"
                         >
+                          <Mic size={16} />
                           Start Voice
                         </button>
                       )}
@@ -294,15 +318,17 @@ function JournalsPage() {
                           <button
                             type="button"
                             onClick={stopVoiceInput}
-                            className="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700"
+                            className="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700 flex items-center gap-2"
                           >
-                            ⏹ Stop
+                            <Square size={16} />
+                            Stop
                           </button>
                           <button
                             type="button"
                             onClick={cancelVoiceInput}
-                            className="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700"
+                            className="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700 flex items-center gap-2"
                           >
+                            <X size={16} />
                             Cancel
                           </button>
                         </>
@@ -341,9 +367,10 @@ function JournalsPage() {
               <div className="flex justify-end mb-4">
                 <button
                   onClick={generatePDF}
-                  className="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700"
+                  className="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700 flex items-center gap-2"
                 >
-                  📄 Download PDF
+                  <FileText size={18} />
+                  Download PDF
                 </button>
               </div>
               {/* Journal List */}
