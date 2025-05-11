@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from pydantic import BaseModel
 import joblib
 
-model = joblib.load("mental_health_model.pkl")
+model = joblib.load("mental_health_predictor.pkl")
 
 app = FastAPI()
 

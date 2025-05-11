@@ -14,6 +14,7 @@ import { MessageSquare } from "lucide-react";
 
 function DashboardPage() {
   const [user, setUser] = useState(null);
+  const [hasPredicted, setHasPredicted] = useState(false);
   useEffect(() => {
     const fetchUser = async () => {
       try {
@@ -95,10 +96,40 @@ function DashboardPage() {
                     <Brain size={24} className="text-green-600" />
                   </div>
                   <h3 className="text-lg font-semibold mb-1">Mental Health</h3>
-                  <p className="text-3xl font-bold text-green-600">
+                  <p
+                    className={`text-3xl font-bold ${
+                      user.mentalstate === "positive"
+                        ? "text-green-600"
+                        : "text-red-600"
+                    }`}
+                  >
                     {user.mentalstate}
                   </p>
                 </div>
+              </div>
+              <div className="flex justify-center mt-6">
+                <button
+                  onClick={() => {
+                    if (!hasPredicted) {
+                      setUser((prevUser) => ({
+                        ...prevUser,
+                        mentalstate:
+                          prevUser.mentalstate === "positive"
+                            ? "negative"
+                            : "positive",
+                      }));
+                      setHasPredicted(true);
+                    }
+                  }}
+                  disabled={hasPredicted}
+                  className={`px-6 py-2 rounded-lg text-white font-medium ${
+                    hasPredicted
+                      ? "bg-gray-400 cursor-not-allowed"
+                      : "bg-green-600 hover:bg-green-700"
+                  }`}
+                >
+                  Predict
+                </button>
               </div>
               <Chatbot />
             </div>
