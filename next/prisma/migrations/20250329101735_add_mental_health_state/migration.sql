@@ -1,4 +1,0 @@
--- AlterTable
-ALTER TABLE "User" ADD COLUMN     "totalBlogs" INTEGER NOT NULL DEFAULT 0,
-ADD COLUMN     "totalComments" INTEGER NOT NULL DEFAULT 0,
-ADD COLUMN     "totalJournals" INTEGER NOT NULL DEFAULT 0;
