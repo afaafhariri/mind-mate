@@ -1,40 +1,41 @@
 import { NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcrypt";
-
-const prisma = new PrismaClient();
+import connectDB from "@/lib/mongoose";
+import User from "@models/users";
 
 export async function POST(req) {
-  const {
-    firstName,
-    lastName,
-    email,
-    password,
-    gender,
-    age,
-    country,
-    city,
-    occupation,
-  } = await req.json();
-
-  if (
-    !firstName ||
-    !email ||
-    !password ||
-    !gender ||
-    !age ||
-    !country ||
-    !city ||
-    !occupation
-  ) {
-    return NextResponse.json(
-      { error: "Missing required fields" },
-      { status: 400 }
-    );
-  }
-
   try {
-    const existingUser = await prisma.user.findUnique({ where: { email } });
+    await connectDB();
+
+    const {
+      firstName,
+      lastName,
+      email,
+      password,
+      gender,
+      age,
+      country,
+      city,
+      occupation,
+    } = await req.json();
+
+    if (
+      !firstName ||
+      !email ||
+      !password ||
+      !gender ||
+      !age ||
+      !country ||
+      !city ||
+      !occupation
+    ) {
+      return NextResponse.json(
+        { error: "Missing required fields" },
+        { status: 400 }
+      );
+    }
+
+    const existingUser = await User.findOne({ email });
     if (existingUser) {
       return NextResponse.json(
         { error: "User already exists" },
@@ -44,23 +45,23 @@ export async function POST(req) {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    await prisma.user.create({
-      data: {
-        firstName,
-        lastName,
-        email,
-        password: hashedPassword,
-        gender,
-        age: parseInt(age, 10),
-        country,
-        city,
-        occupation,
-      },
+    const newUser = new User({
+      firstName,
+      lastName,
+      email,
+      password: hashedPassword,
+      gender,
+      age: parseInt(age, 10),
+      country,
+      city,
+      occupation,
     });
+
+    await newUser.save();
 
     return NextResponse.json({ message: "Signup successful" }, { status: 201 });
   } catch (error) {
-    console.error(error);
+    console.error("Signup error:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }
