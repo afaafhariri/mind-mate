@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
 import jwt from "jsonwebtoken";
-
-const prisma = new PrismaClient();
+import connectDB from "@/lib/mongoose";
+import Journal from "@/models/journal";
+import User from "@/models/users";
 
 function verifyToken(req) {
   const authHeader = req.headers.get("authorization");
@@ -15,19 +15,24 @@ function verifyToken(req) {
 
 // GET One Journal
 export async function GET(req, { params }) {
+  await connectDB();
   const { id } = params;
 
   try {
     const decoded = verifyToken(req);
-    const journal = await prisma.journal.findUnique({
-      where: { id, userId: decoded.userId },
+
+    const journal = await Journal.findOne({
+      _id: id,
+      userId: decoded.userId,
     });
 
-    if (!journal)
+    if (!journal) {
       return NextResponse.json({ error: "Journal not found" }, { status: 404 });
+    }
 
-    return NextResponse.json(journal);
+    return NextResponse.json(journal, { status: 200 });
   } catch (error) {
+    console.error("Error fetching journal:", error);
     return NextResponse.json(
       { error: error.message || "Error fetching journal" },
       { status: 401 }
@@ -37,18 +42,26 @@ export async function GET(req, { params }) {
 
 // UPDATE Journal
 export async function PUT(req, { params }) {
+  await connectDB();
   const { id } = params;
   const { topic, body, location } = await req.json();
 
   try {
     const decoded = verifyToken(req);
-    const journal = await prisma.journal.update({
-      where: { id, userId: decoded.userId },
-      data: { topic, body, location },
-    });
 
-    return NextResponse.json(journal);
+    const updatedJournal = await Journal.findOneAndUpdate(
+      { _id: id, userId: decoded.userId },
+      { topic, body, location, updatedAt: new Date() },
+      { new: true }
+    );
+
+    if (!updatedJournal) {
+      return NextResponse.json({ error: "Journal not found" }, { status: 404 });
+    }
+
+    return NextResponse.json(updatedJournal, { status: 200 });
   } catch (error) {
+    console.error("Error updating journal:", error);
     return NextResponse.json(
       { error: error.message || "Error updating journal" },
       { status: 401 }
@@ -58,26 +71,32 @@ export async function PUT(req, { params }) {
 
 // DELETE Journal
 export async function DELETE(req, { params }) {
+  await connectDB();
   const { id } = params;
 
   try {
     const decoded = verifyToken(req);
-    await prisma.journal.delete({
-      where: { id, userId: decoded.userId },
+
+    const deletedJournal = await Journal.findOneAndDelete({
+      _id: id,
+      userId: decoded.userId,
     });
 
-    // Decrement totalJournals after deletion
-    await prisma.user.update({
-      where: { id: decoded.userId },
-      data: {
-        totalJournals: {
-          decrement: 1,
-        },
-      },
+    if (!deletedJournal) {
+      return NextResponse.json({ error: "Journal not found" }, { status: 404 });
+    }
+
+    // Decrement totalJournals for the user
+    await User.findByIdAndUpdate(decoded.userId, {
+      $inc: { totalJournals: -1 },
     });
 
-    return NextResponse.json({ message: "Journal deleted successfully" });
+    return NextResponse.json(
+      { message: "Journal deleted successfully" },
+      { status: 200 }
+    );
   } catch (error) {
+    console.error("Error deleting journal:", error);
     return NextResponse.json(
       { error: error.message || "Error deleting journal" },
       { status: 401 }
