@@ -13,7 +13,6 @@ function verifyToken(req) {
   return jwt.verify(token, process.env.JWT_SECRET);
 }
 
-// GET One Journal
 export async function GET(req, { params }) {
   await connectDB();
   const { id } = params;
@@ -40,7 +39,6 @@ export async function GET(req, { params }) {
   }
 }
 
-// UPDATE Journal
 export async function PUT(req, { params }) {
   await connectDB();
   const { id } = params;
@@ -69,7 +67,6 @@ export async function PUT(req, { params }) {
   }
 }
 
-// DELETE Journal
 export async function DELETE(req, { params }) {
   await connectDB();
   const { id } = params;
@@ -86,7 +83,6 @@ export async function DELETE(req, { params }) {
       return NextResponse.json({ error: "Journal not found" }, { status: 404 });
     }
 
-    // Decrement totalJournals for the user
     await User.findByIdAndUpdate(decoded.userId, {
       $inc: { totalJournals: -1 },
     });
