@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import jwt from "jsonwebtoken";
-import connectDB from "@/lib/mongoose";
-import User from "@/models/users";
+import connectDB from "@lib/mongoose";
+import User from "@models/users";
 
 export async function GET(req) {
   await connectDB();
