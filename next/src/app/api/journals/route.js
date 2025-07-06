@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 import jwt from "jsonwebtoken";
-import connectDB from "@/lib/mongoose";
-import Journal from "@/models/journal";
-import User from "@/models/users";
+import connectDB from "@lib/mongoose";
+import journal from "@models/journal";
+import User from "@models/users";
 
 export async function POST(req) {
   await connectDB();
