@@ -1,10 +1,11 @@
 import { NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
 import jwt from "jsonwebtoken";
-
-const prisma = new PrismaClient();
+import connectDB from "@/lib/mongoose";
+import User from "@/models/users";
 
 export async function GET(req) {
+  await connectDB();
+
   const authHeader = req.headers.get("authorization");
 
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
@@ -16,16 +17,9 @@ export async function GET(req) {
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-    const user = await prisma.user.findUnique({
-      where: { id: decoded.userId },
-      select: {
-        firstName: true,
-        totalBlogs: true,
-        totalJournals: true,
-        totalComments: true,
-        mentalstate: true,
-      },
-    });
+    const user = await User.findById(decoded.userId).select(
+      "firstName totalBlogs totalJournals totalComments mentalstate"
+    );
 
     if (!user) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
