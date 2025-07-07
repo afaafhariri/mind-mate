@@ -57,7 +57,17 @@ export async function DELETE(req, { params }) {
 
 export async function PUT(req, { params }) {
   await connectDB();
-  const { id } = params;
+
+  const { id } = params; // ✅ No await!
+  console.log("Updating journal ID:", id);
+
+  if (!id) {
+    return NextResponse.json(
+      { error: "Journal ID is missing" },
+      { status: 400 }
+    );
+  }
+
   const { topic, body, location } = await req.json();
 
   try {
@@ -78,7 +88,7 @@ export async function PUT(req, { params }) {
     console.error("Error updating journal:", error);
     return NextResponse.json(
       { error: error.message || "Error updating journal" },
-      { status: 401 }
+      { status: 500 }
     );
   }
 }
