@@ -1,60 +1,118 @@
 import Link from "next/link";
-import { User } from "lucide-react";
-import { LayoutDashboard } from "lucide-react";
-import { NotebookPen } from "lucide-react";
-import { BookOpenCheck } from "lucide-react";
+import {
+  User,
+  LayoutDashboard,
+  NotebookPen,
+  BookOpenCheck,
+} from "lucide-react";
 
 function NavBar({ currentPage = "dashboard" }) {
   const isActive = (page) => currentPage === page;
+
+  const navItems = [
+    {
+      id: "dashboard",
+      icon: LayoutDashboard,
+      href: "/dashboard",
+      label: "Dashboard",
+    },
+    {
+      id: "journals",
+      icon: NotebookPen,
+      href: "/journals",
+      label: "Journals",
+    },
+    {
+      id: "blogs",
+      icon: BookOpenCheck,
+      href: "/blogs",
+      label: "Blogs",
+    },
+    {
+      id: "profile",
+      icon: User,
+      href: "/profile",
+      label: "Profile",
+    },
+  ];
+
   return (
-    <nav className="bg-gradient-to-br from-purple-50 via-blue-50 to-purple-50 h-screen w-20 pt-24 fixed ">
-      <ul className="flex flex-col space-y-8 list-none font-semibold items-center">
-        <li
-          className={`transition-all duration-300 ${
-            isActive("dashboard")
-              ? "text-purple-600 transition-transform"
-              : "text-gray-600 hover:text-purple-600 transform hover:scale-150"
-          }`}
-        >
-          <Link href="/dashboard">
-            <LayoutDashboard size={isActive("dashboard") ? 35 : 20} />
-          </Link>
-        </li>
-        <li
-          className={`transition-all duration-300 ${
-            isActive("journals")
-              ? "text-purple-600 transition-transform"
-              : "text-gray-600 hover:text-purple-600 transform hover:scale-150"
-          }`}
-        >
-          <Link href="/journals">
-            <NotebookPen size={isActive("journals") ? 35 : 20} />
-          </Link>
-        </li>
-        <li
-          className={`transition-all duration-300 ${
-            isActive("blogs")
-              ? "text-purple-600 transition-transform"
-              : "text-gray-600 hover:text-purple-600 transform hover:scale-150"
-          }`}
-        >
-          <Link href="/blogs">
-            <BookOpenCheck size={isActive("blogs") ? 35 : 20} />
-          </Link>
-        </li>
-        <li
-          className={`transition-all duration-300 ${
-            isActive("profile")
-              ? "text-purple-600 transition-transform"
-              : "text-gray-600 hover:text-purple-600 transform hover:scale-150"
-          }`}
-        >
-          <Link href="/profile">
-            <User size={isActive("profile") ? 35 : 20} />
-          </Link>
-        </li>
+    <nav className="bg-white/80 backdrop-blur-lg border-r border-gray-200/50 h-screen w-20 hover:w-64 transition-all duration-300 ease-in-out fixed left-0 top-0 z-50 shadow-xl group">
+      {/* Logo/Brand Area */}
+      <div className="p-6 border-b border-gray-200/50">
+        <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-blue-500 rounded-lg flex items-center justify-center">
+          <span className="text-white font-bold text-sm">N</span>
+        </div>
+      </div>
+
+      {/* Navigation Items */}
+      <ul className="flex flex-col space-y-2 p-4 mt-8">
+        {navItems.map((item) => {
+          const Icon = item.icon;
+          const active = isActive(item.id);
+
+          return (
+            <li key={item.id}>
+              <Link href={item.href} className="block">
+                <div
+                  className={`
+                  relative flex items-center px-3 py-4 rounded-xl transition-all duration-300 cursor-pointer group/item
+                  ${
+                    active
+                      ? "bg-gradient-to-r from-purple-500 to-blue-500 text-white shadow-lg shadow-purple-500/25"
+                      : "text-gray-600 hover:bg-gray-100 hover:text-purple-600"
+                  }
+                `}
+                >
+                  {/* Active indicator */}
+                  {active && (
+                    <div className="absolute -left-4 top-1/2 -translate-y-1/2 w-1 h-8 bg-gradient-to-b from-purple-500 to-blue-500 rounded-r-full" />
+                  )}
+
+                  {/* Icon */}
+                  <div className="min-w-[2rem] flex justify-center">
+                    <Icon
+                      size={24}
+                      className={`transition-all duration-300 ${
+                        active ? "scale-110" : "group-hover/item:scale-110"
+                      }`}
+                    />
+                  </div>
+
+                  {/* Label - only visible on hover */}
+                  <span
+                    className={`
+                    ml-4 font-medium whitespace-nowrap transition-all duration-300
+                    opacity-0 group-hover:opacity-100 translate-x-2 group-hover:translate-x-0
+                    ${active ? "opacity-100 translate-x-0" : ""}
+                  `}
+                  >
+                    {item.label}
+                  </span>
+
+                  {/* Hover effect */}
+                  {!active && (
+                    <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-purple-500/0 to-blue-500/0 group-hover/item:from-purple-500/10 group-hover/item:to-blue-500/10 transition-all duration-300" />
+                  )}
+                </div>
+              </Link>
+            </li>
+          );
+        })}
       </ul>
+
+      {/* Bottom section */}
+      <div className="absolute bottom-8 left-0 right-0 px-4">
+        <div className="h-px bg-gradient-to-r from-transparent via-gray-300 to-transparent mb-4" />
+        <div className="flex items-center justify-center opacity-50 group-hover:opacity-100 transition-opacity duration-300">
+          <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+          <span className="ml-2 text-sm text-gray-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+            Online
+          </span>
+        </div>
+      </div>
     </nav>
   );
 }
+
 export default NavBar;
