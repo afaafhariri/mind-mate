@@ -19,7 +19,7 @@ function JournalsPage() {
   const [journalToDelete, setJournalToDelete] = useState(null);
   const [isRecording, setIsRecording] = useState(false);
   const [recognition, setRecognition] = useState(null);
-  const [sortOrder, setSortOrder] = useState("latest");
+
   const fetchJournals = async () => {
     try {
       const token = localStorage.getItem("token");
@@ -35,14 +35,6 @@ function JournalsPage() {
   useEffect(() => {
     fetchJournals();
   }, []);
-
-  const sortJournals = (list, order) => {
-    return [...list].sort((a, b) => {
-      const dateA = new Date(a.createdAt);
-      const dateB = new Date(b.createdAt);
-      return order === "latest" ? dateB - dateA : dateA - dateB;
-    });
-  };
 
   const validate = () => {
     const newErrors = {};
@@ -121,7 +113,6 @@ function JournalsPage() {
 
     recognizer.onerror = (event) => {
       console.warn("Speech recognition error:", event.error);
-      // Only show an alert for actual unexpected errors
       if (
         event.error !== "no-speech" &&
         event.error !== "aborted" &&
@@ -146,7 +137,7 @@ function JournalsPage() {
 
   const cancelVoiceInput = () => {
     if (recognition) {
-      recognition.onresult = null; // block result from being applied
+      recognition.onresult = null;
       recognition.stop();
       setRecognition(null);
     }
@@ -194,7 +185,7 @@ function JournalsPage() {
   };
 
   const handleEdit = (journal) => {
-    setEditingId(journal.id);
+    setEditingId(journal._id);
     setTopic(journal.topic);
     setBody(journal.body);
     setLocation(journal.location || "");
@@ -373,10 +364,12 @@ function JournalsPage() {
                   Download PDF
                 </button>
               </div>
-              {/* Journal List */}
               <div className="grid gap-4">
                 {journals.map((journal) => (
-                  <div key={journal.id} className="bg-white p-4 rounded shadow">
+                  <div
+                    key={journal._id}
+                    className="bg-white p-4 rounded shadow"
+                  >
                     <div className="flex justify-between items-center">
                       <h2 className="text-xl font-semibold">{journal.topic}</h2>
                       <div className="flex gap-2">
