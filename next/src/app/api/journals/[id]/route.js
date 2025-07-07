@@ -58,7 +58,7 @@ export async function DELETE(req, { params }) {
 export async function PUT(req, { params }) {
   await connectDB();
 
-  const { id } = params; // ✅ No await!
+  const { id } = params;
   console.log("Updating journal ID:", id);
 
   if (!id) {
