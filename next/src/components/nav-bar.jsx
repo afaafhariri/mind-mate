@@ -23,18 +23,18 @@ function NavBar({ currentPage = "dashboard" }) {
       href: "/journals",
       label: "Journals",
     },
-    {
-      id: "blogs",
-      icon: BookOpenCheck,
-      href: "/blogs",
-      label: "Blogs",
-    },
-    {
-      id: "profile",
-      icon: User,
-      href: "/profile",
-      label: "Profile",
-    },
+    // {
+    //   id: "blogs",
+    //   icon: BookOpenCheck,
+    //   href: "/blogs",
+    //   label: "Blogs",
+    // },
+    // {
+    //   id: "profile",
+    //   icon: User,
+    //   href: "/profile",
+    //   label: "Profile",
+    // },
   ];
 
   return (
