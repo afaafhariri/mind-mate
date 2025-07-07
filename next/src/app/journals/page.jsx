@@ -83,7 +83,7 @@ function JournalsPage() {
         valign: "top",
       },
       headStyles: {
-        fillColor: [63, 81, 181], // Indigo
+        fillColor: [63, 81, 181],
         textColor: 255,
         fontStyle: "bold",
       },
