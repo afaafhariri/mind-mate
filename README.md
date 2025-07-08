@@ -19,11 +19,10 @@
 - PostgreSQL instance
 ### Installation
 1. **Clone the repository**
-   ```bash
-   git clone https://github.com/afaafhariri/mindcare.git
-   cd mindcare
-2. **Start the application**
+2. Navigate to root folder by running
    ```bash
    cd next
+3. **Install dependencies and start the application**
+   ```bash
    npm i
    npm run dev
