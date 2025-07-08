@@ -102,8 +102,12 @@ export default function Journals() {
   };
 
   const handleDelete = async (id) => {
+    const token = localStorage.getItem("token");
     try {
-      setJournals((prev) => prev.filter((j) => j._id !== id));
+      await axios.delete(`/api/journals/${id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      fetchJournals();
     } catch (err) {
       console.error("Error deleting journal", err);
     }
