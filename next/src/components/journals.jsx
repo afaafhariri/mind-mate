@@ -1,5 +1,5 @@
 "use client";
-
+import axios from "axios";
 import { useEffect, useState } from "react";
 import {
   Trash2,
@@ -27,7 +27,7 @@ import {
 } from "lucide-react";
 
 export default function Journals() {
-  const [journals, setJournals] = useState();
+  const [journals, setJournals] = useState([]);
   const [topic, setTopic] = useState("");
   const [body, setBody] = useState("");
   const [location, setLocation] = useState("");
