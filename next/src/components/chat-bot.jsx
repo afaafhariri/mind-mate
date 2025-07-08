@@ -70,7 +70,7 @@ export default function Chatbot() {
   return (
     <div className="mt-12 max-w-4xl mx-auto px-4">
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-3xl font-bold text-gray-800 bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+        <h2 className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
           AI Therapist
         </h2>
         <button
