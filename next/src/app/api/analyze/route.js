@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import connectDB from "@lib/mongoose";
-import Journal from "@/models/journal";
+import Journal from "@models/journal";
 import User from "@/models/users";
 import jwt from "jsonwebtoken";
 import OpenAI from "openai";
