@@ -1,3 +1,4 @@
+"use client";
 import Link from "next/link";
 import {
   User,
@@ -7,7 +8,7 @@ import {
   Brain,
 } from "lucide-react";
 
-function NavBar({ currentPage = "dashboard" }) {
+export default function NavBar({ currentPage = "dashboard" }) {
   const isActive = (page) => currentPage === page;
 
   const navItems = [
@@ -23,6 +24,7 @@ function NavBar({ currentPage = "dashboard" }) {
       href: "/journals",
       label: "Journals",
     },
+    // Uncomment when needed:
     // {
     //   id: "blogs",
     //   icon: BookOpenCheck,
@@ -44,6 +46,7 @@ function NavBar({ currentPage = "dashboard" }) {
           <Brain size={20} className="text-white" />
         </div>
       </div>
+
       <ul className="flex flex-col space-y-2 p-4 mt-8">
         {navItems.map((item) => {
           const Icon = item.icon;
@@ -53,32 +56,35 @@ function NavBar({ currentPage = "dashboard" }) {
             <li key={item.id}>
               <Link href={item.href} className="block">
                 <div
-                  className={`
-                  relative flex items-center px-3 py-4 rounded-xl transition-all duration-300 cursor-pointer group/item
-                  ${
-                    active
-                      ? "bg-gradient-to-r from-purple-500 to-blue-500 text-white shadow-lg shadow-purple-500/25"
-                      : "text-gray-600 hover:bg-gray-100 hover:text-purple-600"
-                  }
-                `}
+                  className={`relative flex items-center px-3 py-4 rounded-xl transition-all duration-300 cursor-pointer group/item
+                    ${
+                      active
+                        ? "bg-gradient-to-r from-purple-500 to-blue-500 text-white shadow-lg shadow-purple-500/25"
+                        : "text-gray-600 hover:bg-gray-100 hover:text-purple-600"
+                    }
+                  `}
                 >
                   {active && (
                     <div className="absolute -left-4 top-1/2 -translate-y-1/2 w-1 h-8 bg-gradient-to-b from-purple-500 to-blue-500 rounded-r-full" />
                   )}
+
                   <div className="min-w-[2rem] flex justify-center">
                     <Icon
                       size={24}
-                      className={`transition-all duration-300 ${
+                      className={`transition-transform duration-300 ${
                         active ? "scale-110" : "group-hover/item:scale-110"
                       }`}
                     />
                   </div>
+
                   <span
-                    className={`
-                    ml-4 font-medium whitespace-nowrap transition-all duration-300
-                    opacity-0 group-hover:opacity-100 translate-x-2 group-hover:translate-x-0
-                    ${active ? "opacity-100 translate-x-0" : ""}
-                  `}
+                    className={`ml-4 font-medium whitespace-nowrap transition-all duration-300 overflow-hidden
+                      ${
+                        active
+                          ? "opacity-0 group-hover:opacity-100 w-0 group-hover:w-auto"
+                          : "opacity-0 group-hover:opacity-100 w-0 group-hover:w-auto"
+                      }
+                    `}
                   >
                     {item.label}
                   </span>
@@ -97,7 +103,7 @@ function NavBar({ currentPage = "dashboard" }) {
         <div className="h-px bg-gradient-to-r from-transparent via-gray-300 to-transparent mb-4" />
         <div className="flex items-center justify-center opacity-50 group-hover:opacity-100 transition-opacity duration-300">
           <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-          <span className="ml-2 text-sm text-gray-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+          <span className="ml-2 text-sm text-gray-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap overflow-hidden">
             Online
           </span>
         </div>
@@ -105,5 +111,3 @@ function NavBar({ currentPage = "dashboard" }) {
     </nav>
   );
 }
-
-export default NavBar;
