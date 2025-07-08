@@ -1,12 +1,6 @@
 "use client";
 import Link from "next/link";
-import {
-  User,
-  LayoutDashboard,
-  NotebookPen,
-  BookOpenCheck,
-  Brain,
-} from "lucide-react";
+import { User, LayoutDashboard, NotebookPen, Brain } from "lucide-react";
 
 export default function NavBar({ currentPage = "dashboard" }) {
   const isActive = (page) => currentPage === page;
@@ -24,13 +18,6 @@ export default function NavBar({ currentPage = "dashboard" }) {
       href: "/journals",
       label: "Journals",
     },
-    // Uncomment when needed:
-    // {
-    //   id: "blogs",
-    //   icon: BookOpenCheck,
-    //   href: "/blogs",
-    //   label: "Blogs",
-    // },
     {
       id: "profile",
       icon: User,
