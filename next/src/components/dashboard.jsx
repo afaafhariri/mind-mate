@@ -79,15 +79,6 @@ function Dashboard() {
       trend: "+8%",
     },
     {
-      title: "Comments Made",
-      value: user.totalComments || 0,
-      icon: MessageSquare,
-      color: "indigo",
-      bgColor: "bg-indigo-100",
-      textColor: "text-indigo-600",
-      trend: "+25%",
-    },
-    {
       title: "Mental Health",
       value: user.mentalstate || "Unknown",
       icon: Brain,
@@ -142,14 +133,6 @@ function Dashboard() {
               <div className="flex items-center justify-between mb-4">
                 <div className={`${stat.bgColor} p-3 rounded-xl`}>
                   <Icon size={24} className={stat.textColor} />
-                </div>
-                <div className="text-right">
-                  <div className="flex items-center space-x-1">
-                    <TrendingUp size={16} className="text-green-500" />
-                    <span className="text-sm text-green-600 font-medium">
-                      {stat.trend}
-                    </span>
-                  </div>
                 </div>
               </div>
               <h3 className="text-sm font-medium text-gray-600 mb-1">
