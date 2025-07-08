@@ -195,37 +195,9 @@ function Dashboard() {
                 Write New Journal
               </span>
             </button>
-            <button className="w-full text-left px-4 py-2 rounded-lg bg-purple-50 hover:bg-purple-100 transition-colors">
-              <span className="text-purple-700 font-medium">
-                Create Blog Post
-              </span>
-            </button>
             <button className="w-full text-left px-4 py-2 rounded-lg bg-green-50 hover:bg-green-100 transition-colors">
               <span className="text-green-700 font-medium">View Analytics</span>
             </button>
-          </div>
-        </div>
-
-        <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-gray-800">
-              Recent Activity
-            </h3>
-            <Activity size={20} className="text-green-600" />
-          </div>
-          <div className="space-y-3">
-            <div className="flex items-center space-x-3">
-              <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-              <span className="text-sm text-gray-600">Journal entry added</span>
-            </div>
-            <div className="flex items-center space-x-3">
-              <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-              <span className="text-sm text-gray-600">Blog post published</span>
-            </div>
-            <div className="flex items-center space-x-3">
-              <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
-              <span className="text-sm text-gray-600">Comment added</span>
-            </div>
           </div>
         </div>
       </div>
