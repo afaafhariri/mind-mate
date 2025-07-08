@@ -27,23 +27,7 @@ import {
 } from "lucide-react";
 
 export default function Journals() {
-  const [journals, setJournals] = useState([
-    {
-      _id: "1",
-      topic: "Morning Reflections",
-      body: "Today I woke up feeling grateful for the small moments in life. The sunrise was particularly beautiful, casting a golden glow across my room. I've been thinking about how important it is to appreciate these quiet moments of peace.",
-      location: "Home",
-      createdAt: new Date().toISOString(),
-    },
-    {
-      _id: "2",
-      topic: "Adventure Day",
-      body: "Went hiking in the mountains today. The fresh air and stunning views reminded me why I love being in nature. Met some fellow hikers who shared interesting stories about their travels.",
-      location: "Blue Ridge Mountains",
-      createdAt: new Date(Date.now() - 86400000).toISOString(),
-    },
-  ]);
-
+  const [journals, setJournals] = useState();
   const [topic, setTopic] = useState("");
   const [body, setBody] = useState("");
   const [location, setLocation] = useState("");
@@ -60,10 +44,16 @@ export default function Journals() {
   const [isListening, setIsListening] = useState(false);
   const [transcript, setTranscript] = useState("");
 
-  // Mock functions for demo (replace with actual API calls)
   const fetchJournals = async () => {
-    // This would normally fetch from your API
-    console.log("Fetching journals...");
+    try {
+      const token = localStorage.getItem("token");
+      const res = await axios.get("/api/journals", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setJournals(res.data);
+    } catch (err) {
+      console.error("Error fetching journals", err);
+    }
   };
 
   useEffect(() => {
@@ -88,25 +78,23 @@ export default function Journals() {
     }
     setErrors({});
 
+    const token = localStorage.getItem("token");
+
     try {
       if (editingId) {
-        // Update existing journal
-        setJournals((prev) =>
-          prev.map((j) =>
-            j._id === editingId ? { ...j, topic, body, location } : j
-          )
+        await axios.put(
+          `/api/journals/${editingId}`,
+          { topic, body, location },
+          { headers: { Authorization: `Bearer ${token}` } }
         );
       } else {
-        // Create new journal
-        const newJournal = {
-          _id: Date.now().toString(),
-          topic,
-          body,
-          location,
-          createdAt: new Date().toISOString(),
-        };
-        setJournals((prev) => [newJournal, ...prev]);
+        await axios.post(
+          "/api/journals",
+          { topic, body, location },
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
       }
+      fetchJournals();
       resetForm();
     } catch (err) {
       console.error("Error saving journal", err);
