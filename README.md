@@ -16,7 +16,8 @@
 ## 🚀 Getting Started
 ### Prerequisites
 - Node.js
-- PostgreSQL instance
+- MongoDB Atlas
+- OpenAI API Key
 ### Installation
 1. **Clone the repository**
 2. Navigate to root folder by running
