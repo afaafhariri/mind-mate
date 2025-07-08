@@ -5,10 +5,7 @@ import {
   Brain,
   BookOpenCheck,
   NotebookPen,
-  MessageSquare,
-  TrendingUp,
   Calendar,
-  Award,
   Activity,
 } from "lucide-react";
 
