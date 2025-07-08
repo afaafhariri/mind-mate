@@ -16,7 +16,6 @@ function Dashboard() {
   const [isLoading, setIsLoading] = useState(true);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
 
-  // ✅ Fetch user on mount
   useEffect(() => {
     const fetchUser = async () => {
       try {
@@ -35,7 +34,6 @@ function Dashboard() {
     fetchUser();
   }, []);
 
-  // ✅ Analyze mental state with OpenAI
   const handleAnalyze = async () => {
     setIsAnalyzing(true);
 
@@ -48,7 +46,7 @@ function Dashboard() {
 
     try {
       const res = await axios.post(
-        "/api/analyze", // ✅ Your API route
+        "/api/analyze",
         {},
         {
           headers: { Authorization: `Bearer ${token}` },
