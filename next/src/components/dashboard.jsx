@@ -32,6 +32,33 @@ function Dashboard() {
     fetchUser();
   }, []);
 
+  const handleAnalyze = async () => {
+    setLoading(true);
+    setResult(null);
+
+    const token = localStorage.getItem("token");
+    if (!token) {
+      alert("Please log in first.");
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const res = await axios.post(
+        "/api/analyze",
+        {},
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      setResult(res.data.mentalstate);
+    } catch (err) {
+      console.error(err);
+      alert(err.response?.data?.error || "Something went wrong");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen flex justify-center items-center">
