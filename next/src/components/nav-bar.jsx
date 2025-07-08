@@ -31,12 +31,12 @@ export default function NavBar({ currentPage = "dashboard" }) {
     //   href: "/blogs",
     //   label: "Blogs",
     // },
-    // {
-    //   id: "profile",
-    //   icon: User,
-    //   href: "/profile",
-    //   label: "Profile",
-    // },
+    {
+      id: "profile",
+      icon: User,
+      href: "/profile",
+      label: "Profile",
+    },
   ];
 
   return (
