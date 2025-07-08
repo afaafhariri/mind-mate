@@ -181,25 +181,6 @@ function Dashboard() {
             {hasPredicted ? "Analysis Complete" : "Analyze Mental State"}
           </button>
         </div>
-
-        <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-gray-800">
-              Quick Actions
-            </h3>
-            <Award size={20} className="text-blue-600" />
-          </div>
-          <div className="space-y-3">
-            <button className="w-full text-left px-4 py-2 rounded-lg bg-blue-50 hover:bg-blue-100 transition-colors">
-              <span className="text-blue-700 font-medium">
-                Write New Journal
-              </span>
-            </button>
-            <button className="w-full text-left px-4 py-2 rounded-lg bg-green-50 hover:bg-green-100 transition-colors">
-              <span className="text-green-700 font-medium">View Analytics</span>
-            </button>
-          </div>
-        </div>
       </div>
     </div>
   );
