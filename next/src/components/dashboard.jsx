@@ -1,4 +1,5 @@
 "use client";
+
 import { useEffect, useState } from "react";
 import axios from "axios";
 import {
@@ -13,7 +14,9 @@ function Dashboard() {
   const [user, setUser] = useState(null);
   const [hasPredicted, setHasPredicted] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
 
+  // ✅ Fetch user on mount
   useEffect(() => {
     const fetchUser = async () => {
       try {
@@ -22,9 +25,9 @@ function Dashboard() {
           headers: { Authorization: `Bearer ${token}` },
         });
         setUser(data);
-        setIsLoading(false);
       } catch (error) {
         console.error("Failed to fetch user data", error);
+      } finally {
         setIsLoading(false);
       }
     };
@@ -32,30 +35,36 @@ function Dashboard() {
     fetchUser();
   }, []);
 
+  // ✅ Analyze mental state with OpenAI
   const handleAnalyze = async () => {
-    setLoading(true);
-    setResult(null);
+    setIsAnalyzing(true);
 
     const token = localStorage.getItem("token");
     if (!token) {
       alert("Please log in first.");
-      setLoading(false);
+      setIsAnalyzing(false);
       return;
     }
 
     try {
       const res = await axios.post(
-        "/api/analyze",
+        "/api/analyze", // ✅ Your API route
         {},
-        { headers: { Authorization: `Bearer ${token}` } }
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
       );
 
-      setResult(res.data.mentalstate);
+      const updatedState = res.data.mentalstate;
+      if (updatedState) {
+        setUser((prev) => ({ ...prev, mentalstate: updatedState }));
+        setHasPredicted(true);
+      }
     } catch (err) {
       console.error(err);
       alert(err.response?.data?.error || "Something went wrong");
     } finally {
-      setLoading(false);
+      setIsAnalyzing(false);
     }
   };
 
@@ -88,35 +97,29 @@ function Dashboard() {
       title: "Total Blogs",
       value: user.totalBlogs || 0,
       icon: BookOpenCheck,
-      color: "purple",
       bgColor: "bg-purple-100",
       textColor: "text-purple-600",
-      trend: "+12%",
     },
     {
       title: "Journals Written",
       value: user.totalJournals || 0,
       icon: NotebookPen,
-      color: "blue",
       bgColor: "bg-blue-100",
       textColor: "text-blue-600",
-      trend: "+8%",
     },
     {
       title: "Mental Health",
       value: user.mentalstate || "Unknown",
       icon: Brain,
-      color: user.mentalstate === "positive" ? "green" : "red",
       bgColor: user.mentalstate === "positive" ? "bg-green-100" : "bg-red-100",
       textColor:
         user.mentalstate === "positive" ? "text-green-600" : "text-red-600",
-      trend: user.mentalstate === "positive" ? "Good" : "Needs Attention",
     },
   ];
 
   return (
     <div className="p-8 bg-gradient-to-br from-gray-50 via-blue-50 to-purple-50 min-h-screen">
-      {/* Header Section */}
+      {/* Header */}
       <div className="mb-8">
         <div className="flex justify-between items-center">
           <div>
@@ -146,12 +149,13 @@ function Dashboard() {
         </div>
       </div>
 
+      {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        {stats.map((stat, index) => {
+        {stats.map((stat, idx) => {
           const Icon = stat.icon;
           return (
             <div
-              key={index}
+              key={idx}
               className="bg-white rounded-xl shadow-sm hover:shadow-md transition-shadow duration-300 p-6 border border-gray-100"
             >
               <div className="flex items-center justify-between mb-4">
@@ -170,6 +174,7 @@ function Dashboard() {
         })}
       </div>
 
+      {/* Analysis Section */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
         <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
           <div className="flex items-center justify-between mb-4">
@@ -182,27 +187,22 @@ function Dashboard() {
             Get AI-powered insights about your current mental state based on
             your recent activities.
           </p>
+
+          {/* ✅ Your connected button */}
           <button
-            onClick={() => {
-              if (!hasPredicted) {
-                setUser((prevUser) => ({
-                  ...prevUser,
-                  mentalstate:
-                    prevUser.mentalstate === "positive"
-                      ? "negative"
-                      : "positive",
-                }));
-                setHasPredicted(true);
-              }
-            }}
-            disabled={hasPredicted}
+            onClick={handleAnalyze}
+            disabled={hasPredicted || isAnalyzing}
             className={`w-full px-4 py-2 rounded-lg text-white font-medium transition-colors ${
-              hasPredicted
+              hasPredicted || isAnalyzing
                 ? "bg-gray-400 cursor-not-allowed"
                 : "bg-purple-600 hover:bg-purple-700"
             }`}
           >
-            {hasPredicted ? "Analysis Complete" : "Analyze Mental State"}
+            {hasPredicted
+              ? "Analysis Complete"
+              : isAnalyzing
+              ? "Analyzing..."
+              : "Analyze Mental State"}
           </button>
         </div>
       </div>
