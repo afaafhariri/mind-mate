@@ -64,7 +64,6 @@ export async function POST(req) {
       );
     }
 
-    // 3. Update User
     await User.findByIdAndUpdate(decoded.userId, { mentalstate: response });
 
     return NextResponse.json({ mentalstate: response });
