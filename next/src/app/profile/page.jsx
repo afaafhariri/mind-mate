@@ -10,14 +10,13 @@ import axios from "axios";
 import {
   User,
   Mail,
-  Globe,
   Briefcase,
   Calendar,
   MapPin,
   UserCircle,
 } from "lucide-react";
 
-// Helper to calculate "Joined X ago"
+// Helper: "Joined X ago"
 function formatJoinedAgo(dateString) {
   const createdAt = new Date(dateString);
   const now = new Date();
@@ -53,10 +52,12 @@ export default function ProfilePage() {
     const fetchUserProfile = async () => {
       try {
         const token = localStorage.getItem("token");
+        if (!token) {
+          router.push("/login");
+          return;
+        }
         const { data } = await axios.get("/api/users/profile", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          headers: { Authorization: `Bearer ${token}` },
         });
         console.log("Fetched user profile:", data);
         setUser(data);
@@ -68,7 +69,7 @@ export default function ProfilePage() {
     };
 
     fetchUserProfile();
-  }, []);
+  }, [router]);
 
   return (
     <UserRouteProtection>
@@ -87,24 +88,33 @@ export default function ProfilePage() {
                 <div className="text-center text-gray-500">Loading...</div>
               ) : user ? (
                 <div className="space-y-4">
-                  <div>
-                    <h2 className="text-sm font-semibold text-gray-500 uppercase mb-1">
-                      Full Name
-                    </h2>
-                    <p className="text-lg font-medium text-gray-800">
-                      {user.firstName} {user.lastName}
-                    </p>
-                  </div>
+                  {/* Full Name */}
+                  {(user.firstName || user.lastName) && (
+                    <div>
+                      <h2 className="text-sm font-semibold text-gray-500 uppercase mb-1">
+                        Full Name
+                      </h2>
+                      <p className="text-lg font-medium text-gray-800">
+                        {`${user.firstName || ""} ${
+                          user.lastName || ""
+                        }`.trim()}
+                      </p>
+                    </div>
+                  )}
 
-                  <div>
-                    <h2 className="text-sm font-semibold text-gray-500 uppercase mb-1 flex items-center gap-1">
-                      <Mail className="w-4 h-4" /> Email
-                    </h2>
-                    <p className="text-lg font-medium text-gray-800">
-                      {user.email}
-                    </p>
-                  </div>
+                  {/* Email */}
+                  {user.email && (
+                    <div>
+                      <h2 className="text-sm font-semibold text-gray-500 uppercase mb-1 flex items-center gap-1">
+                        <Mail className="w-4 h-4" /> Email
+                      </h2>
+                      <p className="text-lg font-medium text-gray-800">
+                        {user.email}
+                      </p>
+                    </div>
+                  )}
 
+                  {/* Location */}
                   {(user.city || user.country) && (
                     <div>
                       <h2 className="text-sm font-semibold text-gray-500 uppercase mb-1 flex items-center gap-1">
@@ -117,6 +127,7 @@ export default function ProfilePage() {
                     </div>
                   )}
 
+                  {/* Age */}
                   {user.age && (
                     <div>
                       <h2 className="text-sm font-semibold text-gray-500 uppercase mb-1 flex items-center gap-1">
@@ -128,6 +139,7 @@ export default function ProfilePage() {
                     </div>
                   )}
 
+                  {/* Gender */}
                   {user.gender && (
                     <div>
                       <h2 className="text-sm font-semibold text-gray-500 uppercase mb-1 flex items-center gap-1">
@@ -139,6 +151,7 @@ export default function ProfilePage() {
                     </div>
                   )}
 
+                  {/* Occupation */}
                   {user.occupation && (
                     <div>
                       <h2 className="text-sm font-semibold text-gray-500 uppercase mb-1 flex items-center gap-1">
@@ -150,6 +163,7 @@ export default function ProfilePage() {
                     </div>
                   )}
 
+                  {/* Account Created */}
                   {user.createdAt && (
                     <div>
                       <h2 className="text-sm font-semibold text-gray-500 uppercase mb-1 flex items-center gap-1">

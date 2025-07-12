@@ -1,5 +1,5 @@
 import connectDB from "@lib/mongoose";
-import User from "@/models/User";
+import User from "@models/users";
 import jwt from "jsonwebtoken";
 
 export default async function handler(req, res) {
