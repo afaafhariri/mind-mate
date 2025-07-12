@@ -18,7 +18,7 @@ export async function GET(req) {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
     const user = await User.findById(decoded.userId).select(
-      "firstName totalBlogs totalJournals totalComments mentalstate"
+      "firstName totalJournals mentalstate"
     );
 
     if (!user) {
