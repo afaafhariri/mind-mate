@@ -1,9 +1,9 @@
-import dbConnect from "@/lib/dbConnect";
+import connectDB from "@lib/mongoose";
 import User from "@/models/User";
 import jwt from "jsonwebtoken";
 
 export default async function handler(req, res) {
-  await dbConnect();
+  await connectDB();
 
   if (req.method !== "GET") {
     return res.status(405).json({ message: "Method not allowed" });
