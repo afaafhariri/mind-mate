@@ -50,20 +50,24 @@ export default function ProfilePage() {
   };
 
   useEffect(() => {
-    const fetchUser = async () => {
+    const fetchUserProfile = async () => {
       try {
         const token = localStorage.getItem("token");
-        const { data } = await axios.get("/api/users/me", {
-          headers: { Authorization: `Bearer ${token}` },
+        const { data } = await axios.get("/api/users/profile", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         });
+        console.log("Fetched user profile:", data);
         setUser(data);
       } catch (err) {
-        console.error("Failed to fetch user:", err);
+        console.error("Failed to fetch profile:", err);
       } finally {
         setLoading(false);
       }
     };
-    fetchUser();
+
+    fetchUserProfile();
   }, []);
 
   return (
