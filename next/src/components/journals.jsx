@@ -21,9 +21,6 @@ import {
   Volume2,
   Save,
   XCircle,
-  Heart,
-  Star,
-  Zap,
 } from "lucide-react";
 
 export default function Journals() {

@@ -16,7 +16,6 @@ import {
   UserCircle,
 } from "lucide-react";
 
-// Helper: "Joined X ago"
 function formatJoinedAgo(dateString) {
   const createdAt = new Date(dateString);
   const now = new Date();
@@ -88,7 +87,6 @@ export default function ProfilePage() {
                 <div className="text-center text-gray-500">Loading...</div>
               ) : user ? (
                 <div className="space-y-4">
-                  {/* Full Name */}
                   {(user.firstName || user.lastName) && (
                     <div>
                       <h2 className="text-sm font-semibold text-gray-500 uppercase mb-1">
@@ -102,7 +100,6 @@ export default function ProfilePage() {
                     </div>
                   )}
 
-                  {/* Email */}
                   {user.email && (
                     <div>
                       <h2 className="text-sm font-semibold text-gray-500 uppercase mb-1 flex items-center gap-1">
@@ -114,7 +111,6 @@ export default function ProfilePage() {
                     </div>
                   )}
 
-                  {/* Location */}
                   {(user.city || user.country) && (
                     <div>
                       <h2 className="text-sm font-semibold text-gray-500 uppercase mb-1 flex items-center gap-1">
@@ -127,7 +123,6 @@ export default function ProfilePage() {
                     </div>
                   )}
 
-                  {/* Age */}
                   {user.age && (
                     <div>
                       <h2 className="text-sm font-semibold text-gray-500 uppercase mb-1 flex items-center gap-1">
@@ -139,7 +134,6 @@ export default function ProfilePage() {
                     </div>
                   )}
 
-                  {/* Gender */}
                   {user.gender && (
                     <div>
                       <h2 className="text-sm font-semibold text-gray-500 uppercase mb-1 flex items-center gap-1">
@@ -151,7 +145,6 @@ export default function ProfilePage() {
                     </div>
                   )}
 
-                  {/* Occupation */}
                   {user.occupation && (
                     <div>
                       <h2 className="text-sm font-semibold text-gray-500 uppercase mb-1 flex items-center gap-1">
@@ -163,7 +156,6 @@ export default function ProfilePage() {
                     </div>
                   )}
 
-                  {/* Account Created */}
                   {user.createdAt && (
                     <div>
                       <h2 className="text-sm font-semibold text-gray-500 uppercase mb-1 flex items-center gap-1">

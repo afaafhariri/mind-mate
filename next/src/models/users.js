@@ -16,9 +16,7 @@ const UserSchema = new mongoose.Schema({
     default: "positive",
   },
   createdAt: { type: Date, default: Date.now },
-  totalBlogs: { type: Number, default: 0 },
   totalJournals: { type: Number, default: 0 },
-  totalComments: { type: Number, default: 0 },
 });
 
 export default mongoose.models.User || mongoose.model("User", UserSchema);

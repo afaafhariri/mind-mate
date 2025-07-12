@@ -186,7 +186,6 @@ function Dashboard() {
             your recent activities.
           </p>
 
-          {/* ✅ Your connected button */}
           <button
             onClick={handleAnalyze}
             disabled={hasPredicted || isAnalyzing}
