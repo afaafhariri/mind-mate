@@ -92,13 +92,6 @@ function Dashboard() {
 
   const stats = [
     {
-      title: "Total Blogs",
-      value: user.totalBlogs || 0,
-      icon: BookOpenCheck,
-      bgColor: "bg-purple-100",
-      textColor: "text-purple-600",
-    },
-    {
       title: "Journals Written",
       value: user.totalJournals || 0,
       icon: NotebookPen,
