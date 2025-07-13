@@ -1,39 +1,30 @@
-import { NextResponse } from "next/server";
 import connectDB from "@lib/mongoose";
 import User from "@models/users";
-import jwt from "jsonwebtoken";
+import { NextResponse } from "next/server";
 
-export async function GET(req) {
+export async function GET(request) {
   await connectDB();
 
+  const { searchParams } = new URL(request.url);
+  const email = searchParams.get("email");
+
+  if (!email) {
+    return NextResponse.json({ error: "Email is required" }, { status: 400 });
+  }
+
   try {
-    const authHeader = req.headers.get("authorization");
-
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      return NextResponse.json(
-        { message: "Unauthorized: No token provided" },
-        { status: 401 }
-      );
-    }
-
-    const token = authHeader.split(" ")[1];
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const userId = decoded.id;
-
-    const user = await User.findById(userId).select(
-      "firstName lastName email age gender occupation city country createdAt"
-    );
+    const user = await User.findOne({ email });
 
     if (!user) {
-      return NextResponse.json({ message: "User not found" }, { status: 404 });
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    return NextResponse.json(user, { status: 200 });
+    // Don't send password back
+    const { password, ...userWithoutPassword } = user._doc;
+
+    return NextResponse.json(userWithoutPassword);
   } catch (err) {
-    console.error("[GET /api/users/profile]", err);
-    return NextResponse.json(
-      { message: "Unauthorized: Invalid token" },
-      { status: 401 }
-    );
+    console.error(err);
+    return NextResponse.json({ error: "Server error" }, { status: 500 });
   }
 }
