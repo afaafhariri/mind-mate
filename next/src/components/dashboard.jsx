@@ -109,7 +109,6 @@ function Dashboard() {
 
   return (
     <div className="p-8 bg-gradient-to-br from-gray-50 via-blue-50 to-purple-50 min-h-screen">
-      {/* Header */}
       <div className="mb-8">
         <div className="flex justify-between items-center">
           <div>
@@ -145,7 +144,6 @@ function Dashboard() {
         </div>
       </div>
 
-      {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         {stats.map((stat, idx) => {
           const Icon = stat.icon;
@@ -170,7 +168,6 @@ function Dashboard() {
         })}
       </div>
 
-      {/* Analysis Section */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
         <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
           <div className="flex items-center justify-between mb-4">

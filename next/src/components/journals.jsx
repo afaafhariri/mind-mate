@@ -285,7 +285,6 @@ export default function Journals() {
           </div>
         </div>
 
-        {/* Enhanced Search & Filters */}
         <div className="flex flex-col md:flex-row gap-4 mb-8">
           <div className="relative flex-1">
             <Search
@@ -323,7 +322,6 @@ export default function Journals() {
           </button>
         </div>
 
-        {/* Enhanced Filters */}
         {showFilters && (
           <div
             className={`mb-8 p-6 rounded-xl transition-all duration-300 ${
@@ -349,7 +347,6 @@ export default function Journals() {
           </div>
         )}
 
-        {/* Enhanced Journal Form */}
         {showForm && (
           <div
             className={`mb-8 p-8 rounded-2xl shadow-2xl transition-all duration-500 transform ${
@@ -450,7 +447,6 @@ export default function Journals() {
                 )}
               </div>
 
-              {/* Enhanced Voice Input */}
               <div className="flex items-center gap-4">
                 <div className="text-sm font-semibold text-purple-600">
                   Voice Input:
@@ -480,7 +476,6 @@ export default function Journals() {
                 )}
               </div>
 
-              {/* Enhanced Action Buttons */}
               <div className="flex items-center gap-4 pt-4">
                 <button
                   onClick={handleSubmit}
@@ -505,7 +500,6 @@ export default function Journals() {
           </div>
         )}
 
-        {/* Enhanced Journal Cards */}
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredJournals.map((journal, index) => (
             <div
@@ -607,7 +601,6 @@ export default function Journals() {
           </div>
         )}
 
-        {/* Enhanced Delete Modal */}
         {journalToDelete && (
           <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
             <div

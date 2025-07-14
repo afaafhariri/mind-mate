@@ -75,7 +75,7 @@ export default function Chatbot() {
         <button
           onClick={clearChat}
           disabled={messages.length === 0}
-          className="text-sm text-red-500 border border-red-300 px-4 py-2 rounded-full hover:bg-red-100 hover:scale-105 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 font-medium"
+          className="text-sm text-red-600 border border-red-700 px-4 py-2 rounded-full hover:bg-red-400 hover:scale-105 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 font-medium"
         >
           Clear Chat
         </button>
