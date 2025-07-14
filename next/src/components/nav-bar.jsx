@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import { User, LayoutDashboard, NotebookPen, Brain } from "lucide-react";
+import { LayoutDashboard, NotebookPen, Brain } from "lucide-react";
 
 export default function NavBar({ currentPage = "dashboard" }) {
   const isActive = (page) => currentPage === page;

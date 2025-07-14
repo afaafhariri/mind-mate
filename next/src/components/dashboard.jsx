@@ -2,13 +2,7 @@
 
 import { useEffect, useState } from "react";
 import axios from "axios";
-import {
-  Brain,
-  BookOpenCheck,
-  NotebookPen,
-  Calendar,
-  Activity,
-} from "lucide-react";
+import { Brain, NotebookPen, Calendar, Activity } from "lucide-react";
 
 function Dashboard() {
   const [user, setUser] = useState(null);
