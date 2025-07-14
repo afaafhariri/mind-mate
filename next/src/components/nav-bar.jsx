@@ -18,12 +18,6 @@ export default function NavBar({ currentPage = "dashboard" }) {
       href: "/journals",
       label: "Journals",
     },
-    {
-      id: "profile",
-      icon: User,
-      href: "/profile",
-      label: "Profile",
-    },
   ];
 
   return (
