@@ -60,6 +60,11 @@ function Dashboard() {
     }
   };
 
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    window.location.href = "/login";
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen flex justify-center items-center">
