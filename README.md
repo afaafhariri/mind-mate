@@ -18,12 +18,14 @@
 - Node.js
 - MongoDB Atlas
 - OpenAI API Key
-### Installation
-1. **Clone the repository**
+- Postman(optional)
+### Starting up
+1. Clone the repository
 2. Navigate to root folder by running
    ```bash
    cd next
-3. **Install dependencies and start the application**
+3. Install dependencies and start the application
    ```bash
    npm i
    npm run dev
+**You can test the API with Postman if you want to**
