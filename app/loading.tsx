@@ -10,7 +10,7 @@ export default function Loading() {
                 alt="Loading"
                 width={100}
                 height={100}
-                className="animate-spin"
+                className="animate-bounce"
             />
         </div>
     )
