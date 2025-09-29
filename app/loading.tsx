@@ -4,7 +4,7 @@ import Image from "next/image";
 export default function Loading() {
     return (
         <div className="fixed inset-1 z-[9999] flex flex-col items-center justify-center bg-background/90 text-foreground">
-            <h2 className="text-xl font-semibold mb-4 animate-pulse">Mind Mate</h2>
+            <h2 className="text-xl font-semibold mb-4 animate-pulse">Mind Mate.</h2>
             <Image
                 src="/web-app-manifest-512x512.png"
                 alt="Loading"
