@@ -9,7 +9,7 @@ export default function SplashScreen({children}: Readonly<{ children: React.Reac
     useEffect(() => {
         const timer = setTimeout(() => {
             setIsLoading(false);
-        }, 2000);
+        }, 5000);
         return () => clearTimeout(timer);
     }, []);
 
