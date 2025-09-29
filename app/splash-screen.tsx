@@ -3,7 +3,7 @@
 import {useState, useEffect} from "react";
 import Loading from "./loading";
 
-export default function SplashScreen() {
+export default function SplashScreen({children}: Readonly<{ children: React.ReactNode; }>) {
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
@@ -16,4 +16,5 @@ export default function SplashScreen() {
     if (isLoading) {
         return <Loading />;
     }
+    return <>{children}</>;
 }

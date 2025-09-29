@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import SplashScreen from "./splash-screen";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -32,11 +33,11 @@ export default function RootLayout({children}: Readonly<{ children: React.ReactN
       <head>
         <meta name="apple-mobile-web-app-title" content="Mind Mate" />
       </head>
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
-        {children}
-      </body>
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+          <SplashScreen>
+              {children}
+          </SplashScreen>
+        </body>
     </html>
   );
 }
