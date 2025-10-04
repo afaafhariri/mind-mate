@@ -1,8 +1,5 @@
 import type { ApiResponse } from "../types/auth";
 
-/**
- * Create a successful API response
- */
 export function createSuccessResponse<T>(
   data: T,
   message?: string,
@@ -13,7 +10,6 @@ export function createSuccessResponse<T>(
     data,
     message,
   };
-
   return new Response(JSON.stringify(response), {
     status,
     headers: {
@@ -22,9 +18,6 @@ export function createSuccessResponse<T>(
   });
 }
 
-/**
- * Create an error API response
- */
 export function createErrorResponse(
   error: string,
   status = 400,
@@ -35,7 +28,6 @@ export function createErrorResponse(
     error,
     message,
   };
-
   return new Response(JSON.stringify(response), {
     status,
     headers: {
@@ -44,12 +36,8 @@ export function createErrorResponse(
   });
 }
 
-/**
- * Handle API errors consistently
- */
 export function handleApiError(error: unknown): Response {
   console.error("API Error:", error);
-
   if (error instanceof Error) {
     // Check for specific error types
     if (error.message.includes("already exists")) {
@@ -67,16 +55,11 @@ export function handleApiError(error: unknown): Response {
     } else if (error.message.includes("not found")) {
       return createErrorResponse(error.message, 404);
     }
-
     return createErrorResponse(error.message, 400);
   }
-
   return createErrorResponse("Internal server error", 500);
 }
 
-/**
- * Parse JSON request body safely
- */
 export async function parseRequestBody<T>(request: Request): Promise<T> {
   try {
     const body = await request.json();
@@ -86,9 +69,6 @@ export async function parseRequestBody<T>(request: Request): Promise<T> {
   }
 }
 
-/**
- * Validate request method
- */
 export function validateMethod(
   request: Request,
   allowedMethods: string[]
