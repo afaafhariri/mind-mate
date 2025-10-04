@@ -12,9 +12,7 @@ export default function Loading() {
                     width={100}
                     height={100}
                     className="filter"
-                    style={{
-                        filter: 'brightness(0) saturate(100%) invert(var(--foreground-invert, 0))'
-                    }}
+                    style={{ filter: 'brightness(0) saturate(100%) invert(var(--foreground-invert, 0))' }}
                     priority
                 />
             </div>
