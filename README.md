@@ -1,4 +1,4 @@
-# MindMate - Online Mental Health Tracker
+# MindMate - Online Mental Health Tracker(Under Development)
 
 **MindMate** is a simple, privacy-focused mental health tracking application that helps users monitor their emotional well-being through daily journal entries, AI based therapies and analysis. Designed for ease of use and clarity, MindMate enables users to better understand their mental health over time.
 
