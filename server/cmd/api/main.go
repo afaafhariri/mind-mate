@@ -2,10 +2,12 @@ package main
 
 import (
 	"fmt"
+	"mind-mate-server/internal/database"
 	"mind-mate-server/internal/server"
 )
 
 func main() {
+	database.InitDB()
 
 	server := server.NewServer()
 

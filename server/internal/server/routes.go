@@ -10,6 +10,8 @@ func (s *Server) RegisterRoutes() http.Handler {
 
 	mux.HandleFunc("/", s.HelloWorldHandler)
 	mux.HandleFunc("/health", s.healthHandler)
+	mux.HandleFunc("/auth/signup", s.SignupHandler)
+	mux.HandleFunc("/auth/verify", s.VerifyOTPHandler)
 
 	return mux
 }
