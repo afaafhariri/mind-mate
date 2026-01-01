@@ -6,16 +6,27 @@ const handler = NextAuth({
     CredentialsProvider({
       name: "Credentials",
       credentials: {
-        username: { label: "Username", type: "text", placeholder: "jsmith" },
-        password: { label: "Password", type: "password" },
+        email: { label: "Email", type: "text" },
+        otp: { label: "OTP", type: "text" },
       },
       async authorize(credentials, req) {
-        // TODO: Implement actual authentication logic with the Go backend
-        const user = { id: "1", name: "User", email: "user@example.com" };
+        if (!credentials?.email || !credentials?.otp) return null;
 
-        if (user) {
-          return user;
-        } else {
+        try {
+          const res = await fetch("http://localhost:8080/auth/verify", {
+            method: "POST",
+            body: JSON.stringify(credentials),
+            headers: { "Content-Type": "application/json" },
+          });
+
+          const user = await res.json();
+
+          if (res.ok && user) {
+            return user;
+          }
+          return null;
+        } catch (e) {
+          console.error(e);
           return null;
         }
       },
@@ -25,7 +36,23 @@ const handler = NextAuth({
     strategy: "jwt",
   },
   pages: {
-    signIn: "/auth/login", // Example custom sign in page
+    signIn: "/auth/login",
+  },
+  callbacks: {
+    async jwt({ token, user }) {
+      if (user) {
+        token.id = user.id;
+        // Add other user fields to token if needed
+      }
+      return token;
+    },
+    async session({ session, token }) {
+      if (session.user) {
+        // @ts-ignore
+        session.user.id = token.id;
+      }
+      return session;
+    },
   },
 });
 
