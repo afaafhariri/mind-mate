@@ -22,30 +22,25 @@ func (s *Server) SignupHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Basic validation
 	if user.Email == "" || user.FirstName == "" || user.LastName == "" {
 		http.Error(w, "Missing required fields", http.StatusBadRequest)
 		return
 	}
 
-	// Save user to database
 	err = database.CreateUser(user)
 	if err != nil {
 		http.Error(w, "Error creating user: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	// Generate OTP
 	otp := generateOTP()
 
-	// Save OTP
 	err = database.SaveOTP(user.Email, otp)
 	if err != nil {
 		http.Error(w, "Error saving OTP: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	// Send OTP (Mock for now)
 	fmt.Printf("OTP for %s: %s\n", user.Email, otp)
 
 	w.WriteHeader(http.StatusOK)
@@ -79,7 +74,6 @@ func (s *Server) VerifyOTPHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Get user details to return
 	user, err := database.GetUserByEmail(req.Email)
 	if err != nil {
 		http.Error(w, "Error retrieving user: "+err.Error(), http.StatusInternalServerError)

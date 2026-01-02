@@ -9,7 +9,7 @@ const handler = NextAuth({
         email: { label: "Email", type: "text" },
         otp: { label: "OTP", type: "text" },
       },
-      async authorize(credentials, req) {
+      async authorize(credentials) {
         if (!credentials?.email || !credentials?.otp) return null;
 
         try {
@@ -48,7 +48,7 @@ const handler = NextAuth({
     },
     async session({ session, token }) {
       if (session.user) {
-        // @ts-ignore
+        // @ts-expect-error: session.user.id is not typed in default NextAuth session
         session.user.id = token.id;
       }
       return session;

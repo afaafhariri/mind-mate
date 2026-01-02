@@ -42,20 +42,20 @@ func InitDB() {
 func createTables() {
 	createUsersTable := `
 	CREATE TABLE IF NOT EXISTS users (
-id SERIAL PRIMARY KEY,
-first_name TEXT NOT NULL,
-last_name TEXT NOT NULL,
-email TEXT UNIQUE NOT NULL,
-date_of_birth DATE NOT NULL,
-city TEXT NOT NULL,
-country TEXT NOT NULL,
-profession TEXT NOT NULL,
-marital_status TEXT NOT NULL,
-income_frequency TEXT,
-income_amount NUMERIC,
-created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);`
+		id SERIAL PRIMARY KEY,
+		first_name TEXT NOT NULL,
+		last_name TEXT NOT NULL,
+		email TEXT UNIQUE NOT NULL,
+		date_of_birth DATE NOT NULL,
+		city TEXT NOT NULL,
+		country TEXT NOT NULL,
+		profession TEXT NOT NULL,
+		marital_status TEXT NOT NULL,
+		income_frequency TEXT,
+		income_amount NUMERIC,
+		created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+		updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+	);`
 
 	_, err := DB.Exec(createUsersTable)
 	if err != nil {
@@ -64,10 +64,10 @@ updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 
 	createOTPsTable := `
 	CREATE TABLE IF NOT EXISTS otps (
-email TEXT PRIMARY KEY,
-code TEXT NOT NULL,
-expires_at TIMESTAMP NOT NULL
-);`
+		email TEXT PRIMARY KEY,
+		code TEXT NOT NULL,
+		expires_at TIMESTAMP NOT NULL
+	);`
 
 	_, err = DB.Exec(createOTPsTable)
 	if err != nil {
