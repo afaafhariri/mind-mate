@@ -1,13 +1,13 @@
 package database
 
 import (
-"database/sql"
-"fmt"
-"log"
-"os"
+	"database/sql"
+	"fmt"
+	"log"
+	"os"
 
-_ "github.com/jackc/pgx/v5/stdlib"
-"github.com/joho/godotenv"
+	_ "github.com/jackc/pgx/v5/stdlib"
+	"github.com/joho/godotenv"
 )
 
 var DB *sql.DB
