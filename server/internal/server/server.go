@@ -2,18 +2,21 @@ package server
 
 import (
 	"fmt"
+	"log/slog"
 	"net/http"
 	"time"
 )
 
 type Server struct {
-	port int
+	port   int
+	logger *slog.Logger
 }
 
-func NewServer() *http.Server {
+func NewServer(logger *slog.Logger) *http.Server {
 	port := 8080
 	NewServer := &Server{
-		port: port,
+		port:   port,
+		logger: logger,
 	}
 
 	// Declare Server config

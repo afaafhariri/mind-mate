@@ -41,7 +41,7 @@ func (s *Server) SignupHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fmt.Printf("OTP for %s: %s\n", user.Email, otp)
+	s.logger.Info("OTP generated", "email", user.Email, "otp", otp)
 
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(map[string]string{"message": "Signup successful. Please verify your email with the OTP sent."})

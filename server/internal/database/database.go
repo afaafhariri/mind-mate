@@ -2,8 +2,7 @@ package database
 
 import (
 	"database/sql"
-	"fmt"
-	"log"
+	"log/slog"
 	"os"
 
 	_ "github.com/jackc/pgx/v5/stdlib"
@@ -15,26 +14,29 @@ var DB *sql.DB
 func InitDB() {
 	err := godotenv.Load()
 	if err != nil {
-		log.Println("Error loading .env file")
+		slog.Warn("Error loading .env file")
 	}
 
 	connStr := os.Getenv("DATABASE_URL")
 	if connStr == "" {
-		log.Fatal("DATABASE_URL environment variable is not set")
+		slog.Error("DATABASE_URL environment variable is not set")
+		os.Exit(1)
 	}
 
 	var dbErr error
 	DB, dbErr = sql.Open("pgx", connStr)
 	if dbErr != nil {
-		log.Fatalf("Unable to connect to database: %v\n", dbErr)
+		slog.Error("Unable to connect to database", "error", dbErr)
+		os.Exit(1)
 	}
 
 	err = DB.Ping()
 	if err != nil {
-		log.Fatalf("Unable to ping database: %v\n", err)
+		slog.Error("Unable to ping database", "error", err)
+		os.Exit(1)
 	}
 
-	fmt.Println("Connected to the database")
+	slog.Info("Connected to the database")
 
 	createTables()
 }
@@ -59,7 +61,8 @@ func createTables() {
 
 	_, err := DB.Exec(createUsersTable)
 	if err != nil {
-		log.Fatalf("Unable to create users table: %v\n", err)
+		slog.Error("Unable to create users table", "error", err)
+		os.Exit(1)
 	}
 
 	createOTPsTable := `
@@ -71,8 +74,9 @@ func createTables() {
 
 	_, err = DB.Exec(createOTPsTable)
 	if err != nil {
-		log.Fatalf("Unable to create otps table: %v\n", err)
+		slog.Error("Unable to create otps table", "error", err)
+		os.Exit(1)
 	}
 
-	fmt.Println("Tables created successfully")
+	slog.Info("Tables created successfully")
 }
