@@ -43,6 +43,13 @@ func (s *Server) SignupHandler(w http.ResponseWriter, r *http.Request) {
 
 	s.logger.Info("OTP generated", "email", user.Email, "otp", otp)
 
+	err = s.emailService.SendOTP(user.Email, otp)
+	if err != nil {
+		s.logger.Error("Failed to send OTP email", "error", err)
+		http.Error(w, "Error sending OTP email", http.StatusInternalServerError)
+		return
+	}
+
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(map[string]string{"message": "Signup successful. Please verify your email with the OTP sent."})
 }

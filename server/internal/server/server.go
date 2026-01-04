@@ -3,20 +3,23 @@ package server
 import (
 	"fmt"
 	"log/slog"
+	"mind-mate-server/internal/email"
 	"net/http"
 	"time"
 )
 
 type Server struct {
-	port   int
-	logger *slog.Logger
+	port         int
+	logger       *slog.Logger
+	emailService email.Service
 }
 
-func NewServer(logger *slog.Logger) *http.Server {
+func NewServer(logger *slog.Logger, emailService email.Service) *http.Server {
 	port := 8080
 	NewServer := &Server{
-		port:   port,
-		logger: logger,
+		port:         port,
+		logger:       logger,
+		emailService: emailService,
 	}
 
 	// Declare Server config
