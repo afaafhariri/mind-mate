@@ -1,7 +1,7 @@
 import express from "express";
 import cors from "cors";
 import authRoutes from "./routes/authRoutes";
-import { logger } from "./utils/logger";
+import { requestLogger, errorLogger } from "./middleware/requestLogger";
 
 const app = express();
 
@@ -10,10 +10,7 @@ app.use(cors());
 app.use(express.json());
 
 // Logging middleware
-app.use((req, res, next) => {
-  logger.info(`${req.method} ${req.url}`);
-  next();
-});
+app.use(requestLogger);
 
 // Routes
 app.get("/", (req, res) => {
@@ -27,3 +24,5 @@ app.get("/health", (req, res) => {
 app.use("/auth", authRoutes);
 
 export default app;
+// Error handling middleware
+app.use(errorLogger);
