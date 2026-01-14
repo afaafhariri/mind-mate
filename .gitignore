@@ -22,3 +22,4 @@ client/pnpm-debug.log*
 
 # Server
 server/api
+server/dist
