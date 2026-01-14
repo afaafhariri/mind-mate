@@ -23,7 +23,7 @@ export const signup = async (req: Request, res: Response) => {
     const otp = generateOTP();
     await otpRepository.saveOTP(user.email, otp);
 
-    logger.info("OTP generated", { email: user.email, otp }); // Log for debugging, but remove in prod or mask it
+    logger.info("OTP generated", { email: user.email, otp }); 
 
     await emailService.sendOTP(user.email, otp);
 

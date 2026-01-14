@@ -32,7 +32,6 @@ export const verifyOTP = async (
     return false;
   }
 
-  // Delete OTP after successful verification
   await query("DELETE FROM otps WHERE email = $1", [email]);
 
   return true;
