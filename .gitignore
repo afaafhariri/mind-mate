@@ -1,0 +1,24 @@
+# General
+.DS_Store
+.vscode/
+.idea/
+*.log
+
+# Dependencies
+node_modules/
+
+# Environment Variables
+.env
+.env.*
+
+# Client
+client/dist/
+client/dist-ssr/
+client/*.local
+client/npm-debug.log*
+client/yarn-debug.log*
+client/yarn-error.log*
+client/pnpm-debug.log*
+
+# Server
+server/api
