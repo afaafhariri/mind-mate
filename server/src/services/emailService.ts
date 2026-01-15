@@ -1,11 +1,12 @@
 import nodemailer from "nodemailer";
 import { logger } from "../utils/logger";
+import { getOTPTemplate } from "../utils/emailTemplates";
 
 export const sendOTP = async (to: string, otp: string) => {
   const transporter = nodemailer.createTransport({
     host: process.env.SMTP_HOST,
     port: parseInt(process.env.SMTP_PORT || "587"),
-    secure: false, 
+    secure: false,
     auth: {
       user: process.env.SMTP_USERNAME,
       pass: process.env.SMTP_PASSWORD,
@@ -17,6 +18,7 @@ export const sendOTP = async (to: string, otp: string) => {
     to,
     subject: "Your OTP Code",
     text: `Your OTP code is: ${otp}\n`,
+    html: getOTPTemplate(otp),
   };
 
   try {

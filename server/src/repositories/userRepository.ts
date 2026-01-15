@@ -36,7 +36,7 @@ export const createUser = async (user: User) => {
 
 export const getUserByEmail = async (email: string): Promise<User | null> => {
   const text = `
-    SELECT id, first_name, last_name, email, date_of_birth, city, country, profession, marital_status, income_frequency, income_amount, created_at, updated_at
+    SELECT id, uuid, first_name, last_name, email, date_of_birth, city, country, profession, marital_status, income_frequency, income_amount, created_at, updated_at
     FROM users WHERE email = $1
   `;
   const res = await query(text, [email]);
@@ -48,6 +48,7 @@ export const getUserByEmail = async (email: string): Promise<User | null> => {
   const row = res.rows[0];
   return {
     id: row.id,
+    uuid: row.uuid,
     firstName: row.first_name,
     lastName: row.last_name,
     email: row.email,
