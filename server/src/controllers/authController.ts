@@ -14,7 +14,7 @@ export const signup = async (req: Request, res: Response) => {
   try {
     const user: User = req.body;
 
-    if (!user.email || !user.firstName || !user.lastName) {
+    if (!user.email || !user.firstName || !user.lastName || !user.dateOfBirth) {
       return res.status(400).json({ message: "Missing required fields" });
     }
 
@@ -23,16 +23,13 @@ export const signup = async (req: Request, res: Response) => {
     const otp = generateOTP();
     await otpRepository.saveOTP(user.email, otp);
 
-    logger.info("OTP generated", { email: user.email, otp }); 
+    logger.info("OTP generated", { email: user.email, otp });
 
     await emailService.sendOTP(user.email, otp);
 
-    res
-      .status(200)
-      .json({
-        message:
-          "Signup successful. Please verify your email with the OTP sent.",
-      });
+    res.status(200).json({
+      message: "Signup successful. Please verify your email with the OTP sent.",
+    });
   } catch (error: any) {
     logger.error("Signup error", error);
     res.status(500).json({ message: "Error creating user: " + error.message });
