@@ -1,38 +1,45 @@
-import { query } from "../config/db";
+import prisma from "../config/db";
 
 export const saveOTP = async (email: string, code: string) => {
-  const text = `
-    INSERT INTO otps (email, code, expires_at)
-    VALUES ($1, $2, NOW() + INTERVAL '10 minutes')
-    ON CONFLICT (email) DO UPDATE SET
-      code = EXCLUDED.code,
-      expires_at = EXCLUDED.expires_at
-  `;
-  await query(text, [email, code]);
+  const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes from now
+
+  await prisma.otp.upsert({
+    where: { email },
+    update: {
+      code,
+      expiresAt,
+    },
+    create: {
+      email,
+      code,
+      expiresAt,
+    },
+  });
 };
 
 export const verifyOTP = async (
   email: string,
   code: string
 ): Promise<boolean> => {
-  const text = `SELECT code, expires_at FROM otps WHERE email = $1`;
-  const res = await query(text, [email]);
+  const otpRecord = await prisma.otp.findUnique({
+    where: { email },
+  });
 
-  if (res.rows.length === 0) {
+  if (!otpRecord) {
     return false;
   }
 
-  const { code: storedCode, expires_at } = res.rows[0];
-
-  if (new Date() > new Date(expires_at)) {
+  if (new Date() > otpRecord.expiresAt) {
     return false;
   }
 
-  if (storedCode !== code) {
+  if (otpRecord.code !== code) {
     return false;
   }
 
-  await query("DELETE FROM otps WHERE email = $1", [email]);
+  await prisma.otp.delete({
+    where: { email },
+  });
 
   return true;
 };
