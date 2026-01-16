@@ -22,18 +22,10 @@ export const resolvers = {
   Mutation: {
     signup: async (_: any, args: User) => {
       try {
-        // 1. Create or Update User in Firestore
         await userRepository.createUser(args);
-
-        // 2. Generate numeric OTP
         const otp = Math.floor(100000 + Math.random() * 900000).toString();
-
-        // 3. Save OTP to Firestore
         await otpRepository.saveOTP(args.email, otp);
-
-        // 4. Send OTP via Email
         await emailService.sendOTP(args.email, otp);
-
         logger.info(`Signup process initiated for ${args.email}`);
         return "Signup successful. OTP sent to email.";
       } catch (error: any) {
@@ -42,10 +34,7 @@ export const resolvers = {
       }
     },
 
-    verifyOTP: async (
-      _: any,
-      { email, otp }: { email: string; otp: string }
-    ) => {
+    verifyOTP: async (_: any, { email, otp }: { email: string; otp: string }) => {
       try {
         const isValid = await otpRepository.verifyOTP(email, otp);
         if (!isValid) {

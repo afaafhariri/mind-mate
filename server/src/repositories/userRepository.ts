@@ -6,7 +6,6 @@ const userCollection = db.collection("users");
 export const createUser = async (user: User): Promise<void> => {
   const now = new Date();
   try {
-    // merge: true protects other fields if the document somehow already existed
     await userCollection.doc(user.email).set(
       {
         ...user,
@@ -16,29 +15,26 @@ export const createUser = async (user: User): Promise<void> => {
       { merge: true }
     );
   } catch (error) {
-    console.error("Error creating user:", error);
-    throw error;
+    console.error(`Error creating user with email ${user.email}:`, error);
+    throw new Error("Failed to create user");
   }
 };
 
 export const getUserByEmail = async (email: string): Promise<User | null> => {
   try {
     const doc = await userCollection.doc(email).get();
-
     if (!doc.exists) {
       return null;
     }
 
     const data = doc.data();
-
     if (!data) return null;
-
     return {
       id: doc.id,
       ...data,
     } as User;
   } catch (error) {
-    console.error("Error fetching user by email:", error);
-    throw error;
+    console.error(`Error fetching user by email ${email}:`, error);
+    throw new Error("Failed to fetch user by email");
   }
 };
