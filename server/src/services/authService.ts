@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import crypto from "crypto";
 import * as userRepository from "../repositories/userRepository";
 import * as otpRepository from "../repositories/otpRepository";
-import * as emailService from "../services/emailService";
+import * as emailService from "./emailService";
 import { logger } from "../utils/logger";
 import { User } from "../models/user";
 
