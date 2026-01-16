@@ -28,7 +28,7 @@ export const signup = async (req: Request, res: Response) => {
     await emailService.sendOTP(user.email, otp);
 
     res.status(200).json({
-      message: "Signup successful. Please verify your email with the OTP sent.",
+      message: `Signup successful. Please verify your email with the OTP sent to ${user.email}.`,
     });
   } catch (error: any) {
     logger.error("Signup error", error);
@@ -52,7 +52,7 @@ export const verifyOTP = async (req: Request, res: Response) => {
 
     const user = await userRepository.getUserByEmail(email);
 
-    res.status(200).json(user);
+    res.status(200).json({ message: "OTP verified successfully", user });
   } catch (error: any) {
     logger.error("Verify OTP error", error);
     res.status(500).json({ message: "Error verifying OTP: " + error.message });
