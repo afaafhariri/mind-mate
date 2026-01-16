@@ -1,10 +1,10 @@
 export interface User {
-  id?: number;
+  id?: string;
   uuid?: string;
   firstName: string;
   lastName: string;
   email: string;
-  dateOfBirth: string; // YYYY-MM-DD
+  dateOfBirth: string;
   city: string;
   country: string;
   profession: string;
