@@ -1,9 +1,9 @@
 import { db } from "../db";
-import { User } from "../models/user";
+import { User, createUserDTO } from "../models/user";
 
 const userCollection = db.collection("users");
 
-export const createUser = async (user: User): Promise<void> => {
+export const createUser = async (user: createUserDTO): Promise<void> => {
   const now = new Date();
   try {
     await userCollection.doc(user.email).set(

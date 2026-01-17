@@ -26,6 +26,7 @@ export const typeDefs = `#graphql
       maritalStatus: String!
     ): String
 
+    login(email: String!): String
     verifyOTP(email: String!, otp: String!): Boolean
   }
 `;
