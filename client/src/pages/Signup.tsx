@@ -6,14 +6,31 @@ import {
   Button,
   Typography,
   Link,
-  Grid,
   MenuItem,
   Fade,
-  InputAdornment,
-  IconButton,
+  Alert,
 } from "@mui/material";
-import { Visibility, VisibilityOff, Key } from "@mui/icons-material";
+import { Grid } from "@mui/material";
 import { useNavigate } from "react-router-dom";
+import { useMutation } from "@apollo/client/react";
+import OtpInput from "../components/OtpInput";
+import { SIGNUP_MUTATION, VERIFY_OTP_MUTATION } from "../graphql/mutations";
+
+interface VerifyOtpData {
+  verifyOTP: {
+    token: string;
+    user: {
+      firstName: string;
+      lastName: string;
+      email: string;
+    };
+  };
+}
+
+interface VerifyOtpVars {
+  email: string;
+  otp: string;
+}
 
 const MARITAL_STATUSES = ["Single", "Married", "Divorced", "Widowed"];
 const COUNTRIES = [
@@ -31,7 +48,7 @@ export default function Signup() {
   const navigate = useNavigate();
   const [step, setStep] = useState<"form" | "otp">("form");
   const [otp, setOtp] = useState("");
-  const [showOtp, setShowOtp] = useState(false);
+  const [error, setError] = useState("");
 
   const [formData, setFormData] = useState({
     firstName: "",
@@ -44,6 +61,31 @@ export default function Signup() {
     maritalStatus: "",
   });
 
+  const [signup, { loading: signupLoading }] = useMutation(SIGNUP_MUTATION, {
+    onCompleted: () => {
+      setStep("otp");
+      setError("");
+    },
+    onError: (err: { message: string }) => {
+      setError(err.message);
+    },
+  });
+
+  const [verifyOTP, { loading: verifyLoading }] = useMutation<
+    VerifyOtpData,
+    VerifyOtpVars
+  >(VERIFY_OTP_MUTATION, {
+    onCompleted: (data) => {
+      const { token, user } = data.verifyOTP;
+      localStorage.setItem("token", token);
+      localStorage.setItem("user", JSON.stringify(user));
+      navigate("/home");
+    },
+    onError: (err: { message: string }) => {
+      setError(err.message);
+    },
+  });
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
@@ -51,16 +93,14 @@ export default function Signup() {
 
   const handleFormSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: Call backend Signup mutation -> User created -> OTP Sent
-    console.log("Submitting Signup Form:", formData);
-    setStep("otp");
+    signup({ variables: formData });
   };
 
   const handleOtpSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: Call backend VerifyOTP mutation
-    console.log("Verifying OTP for new user:", otp);
-    navigate("/home");
+    if (otp.length === 6) {
+      verifyOTP({ variables: { email: formData.email, otp } });
+    }
   };
 
   return (
@@ -96,6 +136,12 @@ export default function Signup() {
                     : `Enter the code sent to ${formData.email}`}
                 </Typography>
               </Box>
+
+              {error && (
+                <Alert severity="error" sx={{ mb: 3 }}>
+                  {error}
+                </Alert>
+              )}
 
               {step === "form" ? (
                 <form onSubmit={handleFormSubmit}>
@@ -210,53 +256,36 @@ export default function Signup() {
                     fullWidth
                     variant="contained"
                     size="large"
+                    disabled={signupLoading}
                     sx={{ mt: 4, mb: 2, borderRadius: 2, py: 1.5 }}
                   >
-                    Sign Up
+                    {signupLoading ? "Signing up..." : "Sign Up"}
                   </Button>
                 </form>
               ) : (
                 <form onSubmit={handleOtpSubmit}>
-                  <TextField
-                    margin="normal"
-                    required
-                    fullWidth
-                    name="otp"
-                    label="Enter Verification Code"
-                    type={showOtp ? "text" : "password"}
-                    id="otp"
-                    autoFocus
-                    value={otp}
-                    onChange={(e) => setOtp(e.target.value)}
-                    slotProps={{
-                      input: {
-                        startAdornment: (
-                          <InputAdornment position="start">
-                            <Key color="action" />
-                          </InputAdornment>
-                        ),
-                        endAdornment: (
-                          <InputAdornment position="end">
-                            <IconButton
-                              aria-label="toggle code visibility"
-                              onClick={() => setShowOtp(!showOtp)}
-                              edge="end"
-                            >
-                              {showOtp ? <VisibilityOff /> : <Visibility />}
-                            </IconButton>
-                          </InputAdornment>
-                        ),
-                      },
-                    }}
-                  />
+                  <Box mb={3} mt={1}>
+                    <OtpInput
+                      value={otp}
+                      onChange={setOtp}
+                      length={6}
+                      onComplete={(code) =>
+                        verifyOTP({
+                          variables: { email: formData.email, otp: code },
+                        })
+                      }
+                    />
+                  </Box>
+
                   <Button
                     type="submit"
                     fullWidth
                     variant="contained"
                     size="large"
+                    disabled={verifyLoading || otp.length !== 6}
                     sx={{ mt: 3, mb: 2, borderRadius: 2, py: 1.5 }}
                   >
-                    Verify & Create Account
+                    {verifyLoading ? "Verifying..." : "Verify & Create Account"}
                   </Button>
                   <Button fullWidth onClick={() => setStep("form")}>
                     Back to details

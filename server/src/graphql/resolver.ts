@@ -3,6 +3,7 @@ import * as otpRepository from "../repositories/otpRepository";
 import * as emailService from "../services/emailService";
 import { logger } from "../utils/logger";
 import { createUserDTO } from "../models/user";
+import { generateToken } from "../utils/jasonWebToken";
 
 export const resolvers = {
   Query: {
@@ -34,11 +35,11 @@ export const resolvers = {
       }
     },
 
-    login: async (_: any, {email, otp }: { email: string; otp: string }) => {
+    login: async (_: any, { email, otp }: { email: string; otp: string }) => {
       try {
         const user = await userRepository.getUserByEmail(email);
         if (!user) {
-           throw new Error("User not found. Please sign up.");
+          throw new Error("User not found. Please sign up.");
         }
         const otp = Math.floor(100000 + Math.random() * 900000).toString();
         await otpRepository.saveOTP(email, otp);
@@ -51,18 +52,32 @@ export const resolvers = {
       }
     },
 
-    verifyOTP: async (_: any, { email, otp }: { email: string; otp: string }) => {
+    verifyOTP: async (
+      _: any,
+      { email, otp }: { email: string; otp: string },
+    ) => {
       try {
         const isValid = await otpRepository.verifyOTP(email, otp);
         if (!isValid) {
-          return false;
+          throw new Error("Invalid or expired OTP");
         }
+
+        const user = await userRepository.getUserByEmail(email);
+        if (!user) {
+          throw new Error("User not found");
+        }
+
+        const token = generateToken(user.id || user.email, user.email);
+
         logger.info(`OTP verified successfully for ${email}`);
-        return true;
-      } catch (error) {
+        return {
+          token,
+          user,
+        };
+      } catch (error: any) {
         logger.error("Error in verifyOTP resolver:", error);
-        throw new Error("Failed to verify OTP");
+        throw new Error(error.message || "Failed to verify OTP");
       }
-    }
+    },
   },
 };

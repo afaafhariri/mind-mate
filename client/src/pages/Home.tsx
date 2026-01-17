@@ -1,4 +1,4 @@
-import { Typography, Grid, Paper } from "@mui/material";
+import { Typography, Paper, Grid } from "@mui/material";
 
 export default function Home() {
   return (

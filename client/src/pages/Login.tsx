@@ -8,41 +8,82 @@ import {
   Stack,
   Fade,
   InputAdornment,
-  IconButton,
-  Grid,
   Box,
+  Alert,
 } from "@mui/material";
-import { Visibility, VisibilityOff, Email, Key } from "@mui/icons-material";
+import { Grid } from "@mui/material";
+import { Email } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
+import { useMutation } from "@apollo/client/react";
+import OtpInput from "../components/OtpInput";
+import { LOGIN_MUTATION, VERIFY_OTP_MUTATION } from "../graphql/mutations";
+
+interface VerifyOtpData {
+  verifyOTP: {
+    token: string;
+    user: {
+      firstName: string;
+      lastName: string;
+      email: string;
+    };
+  };
+}
+
+interface VerifyOtpVars {
+  email: string;
+  otp: string;
+}
 
 export default function Login() {
   const navigate = useNavigate();
   const [step, setStep] = useState<"email" | "otp">("email");
   const [email, setEmail] = useState("");
   const [otp, setOtp] = useState("");
-  const [showOtp, setShowOtp] = useState(false);
+  const [error, setError] = useState("");
+
+  const [login, { loading: loginLoading }] = useMutation(LOGIN_MUTATION, {
+    onCompleted: () => {
+      setStep("otp");
+      setError("");
+    },
+    onError: (err: { message: string }) => {
+      setError(err.message);
+    },
+  });
+
+  const [verifyOTP, { loading: verifyLoading }] = useMutation<
+    VerifyOtpData,
+    VerifyOtpVars
+  >(VERIFY_OTP_MUTATION, {
+    onCompleted: (data) => {
+      const { token, user } = data.verifyOTP;
+      localStorage.setItem("token", token);
+      localStorage.setItem("user", JSON.stringify(user));
+      navigate("/home");
+    },
+    onError: (err: { message: string }) => {
+      setError(err.message);
+    },
+  });
 
   const handleEmailSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (email) {
-      // TODO: Call backend Login mutation -> Sends OTP
-      console.log("Requesting OTP for:", email);
-      setStep("otp");
+      login({ variables: { email } });
     }
   };
 
   const handleOtpSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (otp) {
-      // TODO: Call backend VerifyOTP mutation
-      console.log("Verifying OTP:", otp);
-      navigate("/home");
+    if (otp.length === 6) {
+      verifyOTP({ variables: { email, otp } });
     }
   };
 
   const handleBackToEmail = () => {
     setStep("email");
     setOtp("");
+    setError("");
   };
 
   return (
@@ -89,6 +130,12 @@ export default function Login() {
                 </Typography>
               </Box>
 
+              {error && (
+                <Alert severity="error" sx={{ mb: 3 }}>
+                  {error}
+                </Alert>
+              )}
+
               {step === "email" ? (
                 <form onSubmit={handleEmailSubmit} style={{ width: "100%" }}>
                   <TextField
@@ -117,53 +164,34 @@ export default function Login() {
                     fullWidth
                     variant="contained"
                     size="large"
+                    disabled={loginLoading}
                     sx={{ mt: 3, mb: 2, borderRadius: 2, py: 1.5 }}
                   >
-                    Send Login Code
+                    {loginLoading ? "Sending..." : "Send Login Code"}
                   </Button>
                 </form>
               ) : (
                 <form onSubmit={handleOtpSubmit} style={{ width: "100%" }}>
-                  <TextField
-                    margin="normal"
-                    required
-                    fullWidth
-                    name="otp"
-                    label="Enter OTP"
-                    type={showOtp ? "text" : "password"}
-                    id="otp"
-                    autoFocus
-                    value={otp}
-                    onChange={(e) => setOtp(e.target.value)}
-                    slotProps={{
-                      input: {
-                        startAdornment: (
-                          <InputAdornment position="start">
-                            <Key color="action" />
-                          </InputAdornment>
-                        ),
-                        endAdornment: (
-                          <InputAdornment position="end">
-                            <IconButton
-                              aria-label="toggle password visibility"
-                              onClick={() => setShowOtp(!showOtp)}
-                              edge="end"
-                            >
-                              {showOtp ? <VisibilityOff /> : <Visibility />}
-                            </IconButton>
-                          </InputAdornment>
-                        ),
-                      },
-                    }}
-                  />
+                  <Box mb={3} mt={1}>
+                    <OtpInput
+                      value={otp}
+                      onChange={setOtp}
+                      length={6}
+                      onComplete={(code) =>
+                        verifyOTP({ variables: { email, otp: code } })
+                      }
+                    />
+                  </Box>
+
                   <Button
                     type="submit"
                     fullWidth
                     variant="contained"
                     size="large"
+                    disabled={verifyLoading || otp.length !== 6}
                     sx={{ mt: 3, mb: 2, borderRadius: 2, py: 1.5 }}
                   >
-                    Verify & Login
+                    {verifyLoading ? "Verifying..." : "Verify & Login"}
                   </Button>
                   <Button
                     fullWidth

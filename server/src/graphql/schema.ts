@@ -27,6 +27,11 @@ export const typeDefs = `#graphql
     ): String
 
     login(email: String!): String
-    verifyOTP(email: String!, otp: String!): Boolean
+    verifyOTP(email: String!, otp: String!): AuthPayload
+  }
+
+  type AuthPayload {
+    token: String
+    user: User
   }
 `;
