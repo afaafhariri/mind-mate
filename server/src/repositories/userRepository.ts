@@ -6,6 +6,10 @@ const userCollection = db.collection("users");
 export const createUser = async (user: createUserDTO): Promise<void> => {
   const now = new Date();
   try {
+    const userDoc = await userCollection.doc(user.email).get();
+    if (userDoc.exists) {
+      throw new Error("User with this email already exists");
+    }
     await userCollection.doc(user.email).set(
       {
         ...user,
