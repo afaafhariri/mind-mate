@@ -35,7 +35,7 @@ export const resolvers = {
       }
     },
 
-    login: async (_: any, { email, otp }: { email: string; otp: string }) => {
+    login: async (_: any, { email }: { email: string }) => {
       try {
         const user = await userRepository.getUserByEmail(email);
         if (!user) {
