@@ -2,8 +2,7 @@ import * as userRepository from "../repositories/userRepository";
 import * as otpRepository from "../repositories/otpRepository";
 import * as emailService from "../services/emailService";
 import { logger } from "../utils/logger";
-import { User, createUserDTO } from "../models/user";
-import { login } from "../services/authService";
+import { createUserDTO } from "../models/user";
 
 export const resolvers = {
   Query: {
