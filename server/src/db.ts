@@ -11,4 +11,3 @@ if (!fireBaseAdmin.apps.length) {
 }
 
 export const db = getFirestore();
-
