@@ -16,5 +16,4 @@ export interface createUserDTO {
 
 export interface User extends createUserDTO {
   id: string;
-  uuid: string;
 }
