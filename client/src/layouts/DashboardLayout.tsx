@@ -19,7 +19,7 @@ export default function DashboardLayout() {
         display: "flex",
         minHeight: "100vh",
         background:
-          "linear-gradient(180deg, rgba(33, 150, 243, 0.15) 0%, rgba(255, 255, 255, 0) 100%)",
+          "radial-gradient(circle at 50% -20%, rgba(33, 150, 243, 0.2) 0%, rgba(255, 255, 255, 1) 70%)",
       }}
     >
       <CssBaseline />
@@ -28,7 +28,7 @@ export default function DashboardLayout() {
         sx={{
           width: { sm: `calc(100% - ${drawerWidth}px)` },
           ml: { sm: `${drawerWidth}px` },
-          display: { sm: "none" }, // Hide on desktop since sidebar has logo
+          display: { sm: "none" },
         }}
       >
         <Toolbar>
@@ -57,9 +57,7 @@ export default function DashboardLayout() {
           bgcolor: "transparent",
         }}
       >
-        <Toolbar sx={{ display: { sm: "none" } }} />{" "}
-        {/* Spacer for mobile appbar only */}
-        <Outlet />
+        <Toolbar sx={{ display: { sm: "none" } }} /> <Outlet />
       </Box>
     </Box>
   );
