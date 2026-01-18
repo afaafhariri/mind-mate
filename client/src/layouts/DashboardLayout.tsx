@@ -1,17 +1,10 @@
 import { useState } from "react";
-import {
-  Box,
-  CssBaseline,
-  AppBar,
-  Toolbar,
-  IconButton,
-  Typography,
-} from "@mui/material";
+import { Box, CssBaseline, AppBar, Toolbar, IconButton } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import Sidebar from "../components/Sidebar";
 import { Outlet } from "react-router-dom";
 
-const drawerWidth = 240;
+const drawerWidth = 280;
 
 export default function DashboardLayout() {
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -21,13 +14,21 @@ export default function DashboardLayout() {
   };
 
   return (
-    <Box sx={{ display: "flex" }}>
+    <Box
+      sx={{
+        display: "flex",
+        minHeight: "100vh",
+        background:
+          "linear-gradient(180deg, rgba(33, 150, 243, 0.15) 0%, rgba(255, 255, 255, 0) 100%)",
+      }}
+    >
       <CssBaseline />
       <AppBar
         position="fixed"
         sx={{
           width: { sm: `calc(100% - ${drawerWidth}px)` },
           ml: { sm: `${drawerWidth}px` },
+          display: { sm: "none" }, // Hide on desktop since sidebar has logo
         }}
       >
         <Toolbar>
@@ -40,12 +41,8 @@ export default function DashboardLayout() {
           >
             <MenuIcon />
           </IconButton>
-          <Typography variant="h6" noWrap component="div">
-            Mind Mate
-          </Typography>
         </Toolbar>
       </AppBar>
-
       <Sidebar
         mobileOpen={mobileOpen}
         handleDrawerToggle={handleDrawerToggle}
@@ -57,9 +54,11 @@ export default function DashboardLayout() {
           flexGrow: 1,
           p: 3,
           width: { sm: `calc(100% - ${drawerWidth}px)` },
+          bgcolor: "transparent",
         }}
       >
-        <Toolbar />
+        <Toolbar sx={{ display: { sm: "none" } }} />{" "}
+        {/* Spacer for mobile appbar only */}
         <Outlet />
       </Box>
     </Box>

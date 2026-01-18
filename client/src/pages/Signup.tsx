@@ -13,6 +13,8 @@ import {
 import { Grid } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { useMutation } from "@apollo/client/react";
+import { DatePicker } from "@mui/x-date-pickers";
+import dayjs from "dayjs";
 import OtpInput from "../components/OtpInput";
 import { SIGNUP_MUTATION, VERIFY_OTP_MUTATION } from "../graphql/mutations";
 
@@ -79,7 +81,7 @@ export default function Signup() {
       const { token, user } = data.verifyOTP;
       localStorage.setItem("token", token);
       localStorage.setItem("user", JSON.stringify(user));
-      navigate("/home");
+      navigate("/dashboard");
     },
     onError: (err: { message: string }) => {
       setError(err.message);
@@ -180,15 +182,28 @@ export default function Signup() {
                     </Grid>
 
                     <Grid size={{ xs: 12, sm: 6 }}>
-                      <TextField
-                        name="dateOfBirth"
+                      <DatePicker
                         label="Date of Birth"
-                        type="date"
-                        fullWidth
-                        required
-                        slotProps={{ inputLabel: { shrink: true } }}
-                        value={formData.dateOfBirth}
-                        onChange={handleChange}
+                        value={
+                          formData.dateOfBirth
+                            ? dayjs(formData.dateOfBirth)
+                            : null
+                        }
+                        onChange={(newValue) => {
+                          setFormData((prev) => ({
+                            ...prev,
+                            dateOfBirth: newValue
+                              ? newValue.format("YYYY-MM-DD")
+                              : "",
+                          }));
+                        }}
+                        slotProps={{
+                          textField: {
+                            fullWidth: true,
+                            required: true,
+                            name: "dateOfBirth",
+                          },
+                        }}
                       />
                     </Grid>
 

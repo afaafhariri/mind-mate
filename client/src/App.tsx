@@ -1,8 +1,8 @@
-import {useState, useEffect} from "react";
+import { useState, useEffect } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
-import Home from "./pages/Home";
+import Dashboard from "./pages/Dashboard";
 import DashboardLayout from "./layouts/DashboardLayout";
 import { Splash } from "./pages/Splash";
 
@@ -16,7 +16,7 @@ function App() {
   }, []);
 
   if (loading) {
-    return <Splash/>
+    return <Splash />;
   }
 
   return (
@@ -28,7 +28,7 @@ function App() {
 
         {/* Protected Routes (wrapped in DashboardLayout) */}
         <Route element={<DashboardLayout />}>
-          <Route path="/home" element={<Home />} />
+          <Route path="/dashboard" element={<Dashboard />} />
           {/* Add more protected routes here */}
         </Route>
 

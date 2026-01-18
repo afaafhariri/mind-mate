@@ -22,12 +22,17 @@ const client = new ApolloClient({
   cache: new InMemoryCache(),
 });
 
+import { LocalizationProvider } from "@mui/x-date-pickers";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <StyledEngineProvider injectFirst>
       <ApolloProvider client={client}>
-        <CssBaseline />
-        <App />
+        <LocalizationProvider dateAdapter={AdapterDayjs}>
+          <CssBaseline />
+          <App />
+        </LocalizationProvider>
       </ApolloProvider>
     </StyledEngineProvider>
   </StrictMode>,

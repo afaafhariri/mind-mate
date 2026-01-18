@@ -59,7 +59,7 @@ export default function Login() {
       const { token, user } = data.verifyOTP;
       localStorage.setItem("token", token);
       localStorage.setItem("user", JSON.stringify(user));
-      navigate("/home");
+      navigate("/dashboard");
     },
     onError: (err: { message: string }) => {
       setError(err.message);

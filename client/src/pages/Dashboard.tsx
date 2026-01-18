@@ -1,6 +1,6 @@
 import { Typography, Paper, Grid } from "@mui/material";
 
-export default function Home() {
+export default function Dashboard() {
   return (
     <div>
       <Typography variant="h4" gutterBottom>
