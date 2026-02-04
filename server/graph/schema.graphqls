@@ -9,8 +9,43 @@ type User {
   maritalStatus: String
 }
 
+type Journal {
+  id: ID!
+  topic: String!
+  body: String!
+  fontSettings: FontSettings
+  images: [JournalImage!]!
+  createdAt: String!
+  updatedAt: String!
+}
+
+type JournalImage {
+  id: ID!
+  url: String!
+  sortOrder: Int!
+}
+
+type FontSettings {
+  heading: String
+  subheading: String
+  body: String
+  mono: String
+}
+
+input JournalInput {
+  topic: String!
+  body: String!
+  fontHeading: String
+  fontSubheading: String
+  fontBody: String
+  fontMono: String
+  imageUrls: [String!]
+}
+
 type Query {
   getUser(email: String!): User
+  getJournals: [Journal!]!
+  getJournal(id: ID!): Journal
 }
 
 type Mutation {
@@ -27,6 +62,10 @@ type Mutation {
 
   login(email: String!): String
   verifyOTP(email: String!, otp: String!): AuthPayload
+  
+  createJournal(input: JournalInput!): Journal!
+  updateJournal(id: ID!, input: JournalInput!): Journal!
+  deleteJournal(id: ID!): Boolean!
 }
 
 type AuthPayload {

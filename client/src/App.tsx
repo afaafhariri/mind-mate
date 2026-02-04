@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import Dashboard from "./pages/Dashboard";
+import Journals from "./pages/Journals";
 import DashboardLayout from "./layouts/DashboardLayout";
 import { Splash } from "./pages/Splash";
 
@@ -29,7 +30,7 @@ function App() {
         {/* Protected Routes (wrapped in DashboardLayout) */}
         <Route element={<DashboardLayout />}>
           <Route path="/dashboard" element={<Dashboard />} />
-          {/* Add more protected routes here */}
+          <Route path="/journals" element={<Journals />} />
         </Route>
 
         {/* Catch all - redirect to login */}

@@ -32,7 +32,7 @@ func main() {
 	defer db.ClosePostgres()
 
 	// Auto-migrate models
-	if err := db.AutoMigrate(&model.User{}, &model.OTP{}); err != nil {
+	if err := db.AutoMigrate(&model.User{}, &model.OTP{}, &model.Journal{}, &model.JournalImage{}); err != nil {
 		log.Fatalf("Failed to auto-migrate: %v", err)
 	}
 	log.Println("Database migrations completed successfully")
@@ -60,6 +60,15 @@ func main() {
 		auth.POST("/login", authHandler.Login)
 		auth.POST("/verify-otp", authHandler.VerifyOTP)
 	}
+
+	// REST Media routes
+	media := router.Group("/api/media")
+	{
+		media.POST("/upload", authHandler.UploadMedia)
+	}
+
+	// Serve uploaded files
+	router.Static("/uploads", "./uploads")
 
 	// GraphQL routes (kept for future use)
 	gqlServer := handler.NewDefaultServer(graph.NewExecutableSchema(graph.Config{Resolvers: &graph.Resolver{}}))

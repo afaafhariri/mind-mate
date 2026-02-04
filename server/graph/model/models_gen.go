@@ -7,6 +7,39 @@ type AuthPayload struct {
 	User  *User   `json:"user,omitempty"`
 }
 
+type FontSettings struct {
+	Heading    *string `json:"heading,omitempty"`
+	Subheading *string `json:"subheading,omitempty"`
+	Body       *string `json:"body,omitempty"`
+	Mono       *string `json:"mono,omitempty"`
+}
+
+type Journal struct {
+	ID           string          `json:"id"`
+	Topic        string          `json:"topic"`
+	Body         string          `json:"body"`
+	FontSettings *FontSettings   `json:"fontSettings,omitempty"`
+	Images       []*JournalImage `json:"images"`
+	CreatedAt    string          `json:"createdAt"`
+	UpdatedAt    string          `json:"updatedAt"`
+}
+
+type JournalImage struct {
+	ID        string `json:"id"`
+	URL       string `json:"url"`
+	SortOrder int32  `json:"sortOrder"`
+}
+
+type JournalInput struct {
+	Topic          string   `json:"topic"`
+	Body           string   `json:"body"`
+	FontHeading    *string  `json:"fontHeading,omitempty"`
+	FontSubheading *string  `json:"fontSubheading,omitempty"`
+	FontBody       *string  `json:"fontBody,omitempty"`
+	FontMono       *string  `json:"fontMono,omitempty"`
+	ImageUrls      []string `json:"imageUrls,omitempty"`
+}
+
 type Mutation struct {
 }
 

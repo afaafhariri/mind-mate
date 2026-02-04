@@ -52,14 +52,42 @@ type ComplexityRoot struct {
 		User  func(childComplexity int) int
 	}
 
+	FontSettings struct {
+		Body       func(childComplexity int) int
+		Heading    func(childComplexity int) int
+		Mono       func(childComplexity int) int
+		Subheading func(childComplexity int) int
+	}
+
+	Journal struct {
+		Body         func(childComplexity int) int
+		CreatedAt    func(childComplexity int) int
+		FontSettings func(childComplexity int) int
+		ID           func(childComplexity int) int
+		Images       func(childComplexity int) int
+		Topic        func(childComplexity int) int
+		UpdatedAt    func(childComplexity int) int
+	}
+
+	JournalImage struct {
+		ID        func(childComplexity int) int
+		SortOrder func(childComplexity int) int
+		URL       func(childComplexity int) int
+	}
+
 	Mutation struct {
-		Login     func(childComplexity int, email string) int
-		Signup    func(childComplexity int, firstName string, lastName string, email string, dateOfBirth string, city string, country string, profession string, maritalStatus string) int
-		VerifyOtp func(childComplexity int, email string, otp string) int
+		CreateJournal func(childComplexity int, input model.JournalInput) int
+		DeleteJournal func(childComplexity int, id string) int
+		Login         func(childComplexity int, email string) int
+		Signup        func(childComplexity int, firstName string, lastName string, email string, dateOfBirth string, city string, country string, profession string, maritalStatus string) int
+		UpdateJournal func(childComplexity int, id string, input model.JournalInput) int
+		VerifyOtp     func(childComplexity int, email string, otp string) int
 	}
 
 	Query struct {
-		GetUser func(childComplexity int, email string) int
+		GetJournal  func(childComplexity int, id string) int
+		GetJournals func(childComplexity int) int
+		GetUser     func(childComplexity int, email string) int
 	}
 
 	User struct {
@@ -78,9 +106,14 @@ type MutationResolver interface {
 	Signup(ctx context.Context, firstName string, lastName string, email string, dateOfBirth string, city string, country string, profession string, maritalStatus string) (*string, error)
 	Login(ctx context.Context, email string) (*string, error)
 	VerifyOtp(ctx context.Context, email string, otp string) (*model.AuthPayload, error)
+	CreateJournal(ctx context.Context, input model.JournalInput) (*model.Journal, error)
+	UpdateJournal(ctx context.Context, id string, input model.JournalInput) (*model.Journal, error)
+	DeleteJournal(ctx context.Context, id string) (bool, error)
 }
 type QueryResolver interface {
 	GetUser(ctx context.Context, email string) (*model.User, error)
+	GetJournals(ctx context.Context) ([]*model.Journal, error)
+	GetJournal(ctx context.Context, id string) (*model.Journal, error)
 }
 
 type executableSchema struct {
@@ -115,6 +148,115 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 
 		return e.complexity.AuthPayload.User(childComplexity), true
 
+	case "FontSettings.body":
+		if e.complexity.FontSettings.Body == nil {
+			break
+		}
+
+		return e.complexity.FontSettings.Body(childComplexity), true
+	case "FontSettings.heading":
+		if e.complexity.FontSettings.Heading == nil {
+			break
+		}
+
+		return e.complexity.FontSettings.Heading(childComplexity), true
+	case "FontSettings.mono":
+		if e.complexity.FontSettings.Mono == nil {
+			break
+		}
+
+		return e.complexity.FontSettings.Mono(childComplexity), true
+	case "FontSettings.subheading":
+		if e.complexity.FontSettings.Subheading == nil {
+			break
+		}
+
+		return e.complexity.FontSettings.Subheading(childComplexity), true
+
+	case "Journal.body":
+		if e.complexity.Journal.Body == nil {
+			break
+		}
+
+		return e.complexity.Journal.Body(childComplexity), true
+	case "Journal.createdAt":
+		if e.complexity.Journal.CreatedAt == nil {
+			break
+		}
+
+		return e.complexity.Journal.CreatedAt(childComplexity), true
+	case "Journal.fontSettings":
+		if e.complexity.Journal.FontSettings == nil {
+			break
+		}
+
+		return e.complexity.Journal.FontSettings(childComplexity), true
+	case "Journal.id":
+		if e.complexity.Journal.ID == nil {
+			break
+		}
+
+		return e.complexity.Journal.ID(childComplexity), true
+	case "Journal.images":
+		if e.complexity.Journal.Images == nil {
+			break
+		}
+
+		return e.complexity.Journal.Images(childComplexity), true
+	case "Journal.topic":
+		if e.complexity.Journal.Topic == nil {
+			break
+		}
+
+		return e.complexity.Journal.Topic(childComplexity), true
+	case "Journal.updatedAt":
+		if e.complexity.Journal.UpdatedAt == nil {
+			break
+		}
+
+		return e.complexity.Journal.UpdatedAt(childComplexity), true
+
+	case "JournalImage.id":
+		if e.complexity.JournalImage.ID == nil {
+			break
+		}
+
+		return e.complexity.JournalImage.ID(childComplexity), true
+	case "JournalImage.sortOrder":
+		if e.complexity.JournalImage.SortOrder == nil {
+			break
+		}
+
+		return e.complexity.JournalImage.SortOrder(childComplexity), true
+	case "JournalImage.url":
+		if e.complexity.JournalImage.URL == nil {
+			break
+		}
+
+		return e.complexity.JournalImage.URL(childComplexity), true
+
+	case "Mutation.createJournal":
+		if e.complexity.Mutation.CreateJournal == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_createJournal_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.CreateJournal(childComplexity, args["input"].(model.JournalInput)), true
+	case "Mutation.deleteJournal":
+		if e.complexity.Mutation.DeleteJournal == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_deleteJournal_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.DeleteJournal(childComplexity, args["id"].(string)), true
 	case "Mutation.login":
 		if e.complexity.Mutation.Login == nil {
 			break
@@ -137,6 +279,17 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.Mutation.Signup(childComplexity, args["firstName"].(string), args["lastName"].(string), args["email"].(string), args["dateOfBirth"].(string), args["city"].(string), args["country"].(string), args["profession"].(string), args["maritalStatus"].(string)), true
+	case "Mutation.updateJournal":
+		if e.complexity.Mutation.UpdateJournal == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_updateJournal_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.UpdateJournal(childComplexity, args["id"].(string), args["input"].(model.JournalInput)), true
 	case "Mutation.verifyOTP":
 		if e.complexity.Mutation.VerifyOtp == nil {
 			break
@@ -149,6 +302,23 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 
 		return e.complexity.Mutation.VerifyOtp(childComplexity, args["email"].(string), args["otp"].(string)), true
 
+	case "Query.getJournal":
+		if e.complexity.Query.GetJournal == nil {
+			break
+		}
+
+		args, err := ec.field_Query_getJournal_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.GetJournal(childComplexity, args["id"].(string)), true
+	case "Query.getJournals":
+		if e.complexity.Query.GetJournals == nil {
+			break
+		}
+
+		return e.complexity.Query.GetJournals(childComplexity), true
 	case "Query.getUser":
 		if e.complexity.Query.GetUser == nil {
 			break
@@ -217,7 +387,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 	opCtx := graphql.GetOperationContext(ctx)
 	ec := executionContext{opCtx, e, 0, 0, make(chan graphql.DeferredResult)}
-	inputUnmarshalMap := graphql.BuildUnmarshalerMap()
+	inputUnmarshalMap := graphql.BuildUnmarshalerMap(
+		ec.unmarshalInputJournalInput,
+	)
 	first := true
 
 	switch opCtx.Operation.Operation {
@@ -333,6 +505,28 @@ var parsedSchema = gqlparser.MustLoadSchema(sources...)
 
 // region    ***************************** args.gotpl *****************************
 
+func (ec *executionContext) field_Mutation_createJournal_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNJournalInput2mindᚑmateᚑserverᚋgraphᚋmodelᚐJournalInput)
+	if err != nil {
+		return nil, err
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_deleteJournal_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "id", ec.unmarshalNID2string)
+	if err != nil {
+		return nil, err
+	}
+	args["id"] = arg0
+	return args, nil
+}
+
 func (ec *executionContext) field_Mutation_login_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
@@ -390,6 +584,22 @@ func (ec *executionContext) field_Mutation_signup_args(ctx context.Context, rawA
 	return args, nil
 }
 
+func (ec *executionContext) field_Mutation_updateJournal_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "id", ec.unmarshalNID2string)
+	if err != nil {
+		return nil, err
+	}
+	args["id"] = arg0
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNJournalInput2mindᚑmateᚑserverᚋgraphᚋmodelᚐJournalInput)
+	if err != nil {
+		return nil, err
+	}
+	args["input"] = arg1
+	return args, nil
+}
+
 func (ec *executionContext) field_Mutation_verifyOTP_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
@@ -414,6 +624,17 @@ func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs
 		return nil, err
 	}
 	args["name"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_getJournal_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "id", ec.unmarshalNID2string)
+	if err != nil {
+		return nil, err
+	}
+	args["id"] = arg0
 	return args, nil
 }
 
@@ -556,6 +777,430 @@ func (ec *executionContext) fieldContext_AuthPayload_user(_ context.Context, fie
 	return fc, nil
 }
 
+func (ec *executionContext) _FontSettings_heading(ctx context.Context, field graphql.CollectedField, obj *model.FontSettings) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_FontSettings_heading,
+		func(ctx context.Context) (any, error) {
+			return obj.Heading, nil
+		},
+		nil,
+		ec.marshalOString2ᚖstring,
+		true,
+		false,
+	)
+}
+
+func (ec *executionContext) fieldContext_FontSettings_heading(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "FontSettings",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _FontSettings_subheading(ctx context.Context, field graphql.CollectedField, obj *model.FontSettings) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_FontSettings_subheading,
+		func(ctx context.Context) (any, error) {
+			return obj.Subheading, nil
+		},
+		nil,
+		ec.marshalOString2ᚖstring,
+		true,
+		false,
+	)
+}
+
+func (ec *executionContext) fieldContext_FontSettings_subheading(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "FontSettings",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _FontSettings_body(ctx context.Context, field graphql.CollectedField, obj *model.FontSettings) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_FontSettings_body,
+		func(ctx context.Context) (any, error) {
+			return obj.Body, nil
+		},
+		nil,
+		ec.marshalOString2ᚖstring,
+		true,
+		false,
+	)
+}
+
+func (ec *executionContext) fieldContext_FontSettings_body(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "FontSettings",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _FontSettings_mono(ctx context.Context, field graphql.CollectedField, obj *model.FontSettings) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_FontSettings_mono,
+		func(ctx context.Context) (any, error) {
+			return obj.Mono, nil
+		},
+		nil,
+		ec.marshalOString2ᚖstring,
+		true,
+		false,
+	)
+}
+
+func (ec *executionContext) fieldContext_FontSettings_mono(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "FontSettings",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Journal_id(ctx context.Context, field graphql.CollectedField, obj *model.Journal) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Journal_id,
+		func(ctx context.Context) (any, error) {
+			return obj.ID, nil
+		},
+		nil,
+		ec.marshalNID2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Journal_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Journal",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type ID does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Journal_topic(ctx context.Context, field graphql.CollectedField, obj *model.Journal) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Journal_topic,
+		func(ctx context.Context) (any, error) {
+			return obj.Topic, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Journal_topic(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Journal",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Journal_body(ctx context.Context, field graphql.CollectedField, obj *model.Journal) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Journal_body,
+		func(ctx context.Context) (any, error) {
+			return obj.Body, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Journal_body(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Journal",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Journal_fontSettings(ctx context.Context, field graphql.CollectedField, obj *model.Journal) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Journal_fontSettings,
+		func(ctx context.Context) (any, error) {
+			return obj.FontSettings, nil
+		},
+		nil,
+		ec.marshalOFontSettings2ᚖmindᚑmateᚑserverᚋgraphᚋmodelᚐFontSettings,
+		true,
+		false,
+	)
+}
+
+func (ec *executionContext) fieldContext_Journal_fontSettings(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Journal",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "heading":
+				return ec.fieldContext_FontSettings_heading(ctx, field)
+			case "subheading":
+				return ec.fieldContext_FontSettings_subheading(ctx, field)
+			case "body":
+				return ec.fieldContext_FontSettings_body(ctx, field)
+			case "mono":
+				return ec.fieldContext_FontSettings_mono(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type FontSettings", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Journal_images(ctx context.Context, field graphql.CollectedField, obj *model.Journal) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Journal_images,
+		func(ctx context.Context) (any, error) {
+			return obj.Images, nil
+		},
+		nil,
+		ec.marshalNJournalImage2ᚕᚖmindᚑmateᚑserverᚋgraphᚋmodelᚐJournalImageᚄ,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Journal_images(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Journal",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_JournalImage_id(ctx, field)
+			case "url":
+				return ec.fieldContext_JournalImage_url(ctx, field)
+			case "sortOrder":
+				return ec.fieldContext_JournalImage_sortOrder(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type JournalImage", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Journal_createdAt(ctx context.Context, field graphql.CollectedField, obj *model.Journal) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Journal_createdAt,
+		func(ctx context.Context) (any, error) {
+			return obj.CreatedAt, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Journal_createdAt(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Journal",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Journal_updatedAt(ctx context.Context, field graphql.CollectedField, obj *model.Journal) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Journal_updatedAt,
+		func(ctx context.Context) (any, error) {
+			return obj.UpdatedAt, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Journal_updatedAt(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Journal",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _JournalImage_id(ctx context.Context, field graphql.CollectedField, obj *model.JournalImage) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_JournalImage_id,
+		func(ctx context.Context) (any, error) {
+			return obj.ID, nil
+		},
+		nil,
+		ec.marshalNID2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_JournalImage_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "JournalImage",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type ID does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _JournalImage_url(ctx context.Context, field graphql.CollectedField, obj *model.JournalImage) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_JournalImage_url,
+		func(ctx context.Context) (any, error) {
+			return obj.URL, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_JournalImage_url(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "JournalImage",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _JournalImage_sortOrder(ctx context.Context, field graphql.CollectedField, obj *model.JournalImage) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_JournalImage_sortOrder,
+		func(ctx context.Context) (any, error) {
+			return obj.SortOrder, nil
+		},
+		nil,
+		ec.marshalNInt2int32,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_JournalImage_sortOrder(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "JournalImage",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Mutation_signup(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
@@ -685,6 +1330,161 @@ func (ec *executionContext) fieldContext_Mutation_verifyOTP(ctx context.Context,
 	return fc, nil
 }
 
+func (ec *executionContext) _Mutation_createJournal(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Mutation_createJournal,
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.resolvers.Mutation().CreateJournal(ctx, fc.Args["input"].(model.JournalInput))
+		},
+		nil,
+		ec.marshalNJournal2ᚖmindᚑmateᚑserverᚋgraphᚋmodelᚐJournal,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Mutation_createJournal(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_Journal_id(ctx, field)
+			case "topic":
+				return ec.fieldContext_Journal_topic(ctx, field)
+			case "body":
+				return ec.fieldContext_Journal_body(ctx, field)
+			case "fontSettings":
+				return ec.fieldContext_Journal_fontSettings(ctx, field)
+			case "images":
+				return ec.fieldContext_Journal_images(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_Journal_createdAt(ctx, field)
+			case "updatedAt":
+				return ec.fieldContext_Journal_updatedAt(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Journal", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_createJournal_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_updateJournal(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Mutation_updateJournal,
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.resolvers.Mutation().UpdateJournal(ctx, fc.Args["id"].(string), fc.Args["input"].(model.JournalInput))
+		},
+		nil,
+		ec.marshalNJournal2ᚖmindᚑmateᚑserverᚋgraphᚋmodelᚐJournal,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Mutation_updateJournal(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_Journal_id(ctx, field)
+			case "topic":
+				return ec.fieldContext_Journal_topic(ctx, field)
+			case "body":
+				return ec.fieldContext_Journal_body(ctx, field)
+			case "fontSettings":
+				return ec.fieldContext_Journal_fontSettings(ctx, field)
+			case "images":
+				return ec.fieldContext_Journal_images(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_Journal_createdAt(ctx, field)
+			case "updatedAt":
+				return ec.fieldContext_Journal_updatedAt(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Journal", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_updateJournal_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_deleteJournal(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Mutation_deleteJournal,
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.resolvers.Mutation().DeleteJournal(ctx, fc.Args["id"].(string))
+		},
+		nil,
+		ec.marshalNBoolean2bool,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Mutation_deleteJournal(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Boolean does not have child fields")
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_deleteJournal_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Query_getUser(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
@@ -738,6 +1538,108 @@ func (ec *executionContext) fieldContext_Query_getUser(ctx context.Context, fiel
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Query_getUser_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_getJournals(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Query_getJournals,
+		func(ctx context.Context) (any, error) {
+			return ec.resolvers.Query().GetJournals(ctx)
+		},
+		nil,
+		ec.marshalNJournal2ᚕᚖmindᚑmateᚑserverᚋgraphᚋmodelᚐJournalᚄ,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Query_getJournals(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_Journal_id(ctx, field)
+			case "topic":
+				return ec.fieldContext_Journal_topic(ctx, field)
+			case "body":
+				return ec.fieldContext_Journal_body(ctx, field)
+			case "fontSettings":
+				return ec.fieldContext_Journal_fontSettings(ctx, field)
+			case "images":
+				return ec.fieldContext_Journal_images(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_Journal_createdAt(ctx, field)
+			case "updatedAt":
+				return ec.fieldContext_Journal_updatedAt(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Journal", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_getJournal(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Query_getJournal,
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.resolvers.Query().GetJournal(ctx, fc.Args["id"].(string))
+		},
+		nil,
+		ec.marshalOJournal2ᚖmindᚑmateᚑserverᚋgraphᚋmodelᚐJournal,
+		true,
+		false,
+	)
+}
+
+func (ec *executionContext) fieldContext_Query_getJournal(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_Journal_id(ctx, field)
+			case "topic":
+				return ec.fieldContext_Journal_topic(ctx, field)
+			case "body":
+				return ec.fieldContext_Journal_body(ctx, field)
+			case "fontSettings":
+				return ec.fieldContext_Journal_fontSettings(ctx, field)
+			case "images":
+				return ec.fieldContext_Journal_images(ctx, field)
+			case "createdAt":
+				return ec.fieldContext_Journal_createdAt(ctx, field)
+			case "updatedAt":
+				return ec.fieldContext_Journal_updatedAt(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Journal", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_getJournal_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -2530,6 +3432,75 @@ func (ec *executionContext) fieldContext___Type_isOneOf(_ context.Context, field
 
 // region    **************************** input.gotpl *****************************
 
+func (ec *executionContext) unmarshalInputJournalInput(ctx context.Context, obj any) (model.JournalInput, error) {
+	var it model.JournalInput
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"topic", "body", "fontHeading", "fontSubheading", "fontBody", "fontMono", "imageUrls"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "topic":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("topic"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Topic = data
+		case "body":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("body"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Body = data
+		case "fontHeading":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("fontHeading"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.FontHeading = data
+		case "fontSubheading":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("fontSubheading"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.FontSubheading = data
+		case "fontBody":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("fontBody"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.FontBody = data
+		case "fontMono":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("fontMono"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.FontMono = data
+		case "imageUrls":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("imageUrls"))
+			data, err := ec.unmarshalOString2ᚕstringᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.ImageUrls = data
+		}
+	}
+
+	return it, nil
+}
+
 // endregion **************************** input.gotpl *****************************
 
 // region    ************************** interface.gotpl ***************************
@@ -2553,6 +3524,163 @@ func (ec *executionContext) _AuthPayload(ctx context.Context, sel ast.SelectionS
 			out.Values[i] = ec._AuthPayload_token(ctx, field, obj)
 		case "user":
 			out.Values[i] = ec._AuthPayload_user(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var fontSettingsImplementors = []string{"FontSettings"}
+
+func (ec *executionContext) _FontSettings(ctx context.Context, sel ast.SelectionSet, obj *model.FontSettings) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, fontSettingsImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("FontSettings")
+		case "heading":
+			out.Values[i] = ec._FontSettings_heading(ctx, field, obj)
+		case "subheading":
+			out.Values[i] = ec._FontSettings_subheading(ctx, field, obj)
+		case "body":
+			out.Values[i] = ec._FontSettings_body(ctx, field, obj)
+		case "mono":
+			out.Values[i] = ec._FontSettings_mono(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var journalImplementors = []string{"Journal"}
+
+func (ec *executionContext) _Journal(ctx context.Context, sel ast.SelectionSet, obj *model.Journal) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, journalImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("Journal")
+		case "id":
+			out.Values[i] = ec._Journal_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "topic":
+			out.Values[i] = ec._Journal_topic(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "body":
+			out.Values[i] = ec._Journal_body(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "fontSettings":
+			out.Values[i] = ec._Journal_fontSettings(ctx, field, obj)
+		case "images":
+			out.Values[i] = ec._Journal_images(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "createdAt":
+			out.Values[i] = ec._Journal_createdAt(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "updatedAt":
+			out.Values[i] = ec._Journal_updatedAt(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var journalImageImplementors = []string{"JournalImage"}
+
+func (ec *executionContext) _JournalImage(ctx context.Context, sel ast.SelectionSet, obj *model.JournalImage) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, journalImageImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("JournalImage")
+		case "id":
+			out.Values[i] = ec._JournalImage_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "url":
+			out.Values[i] = ec._JournalImage_url(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "sortOrder":
+			out.Values[i] = ec._JournalImage_sortOrder(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -2607,6 +3735,27 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_verifyOTP(ctx, field)
 			})
+		case "createJournal":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_createJournal(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "updateJournal":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_updateJournal(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "deleteJournal":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_deleteJournal(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -2659,6 +3808,47 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_getUser(ctx, field)
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "getJournals":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_getJournals(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "getJournal":
+			field := field
+
+			innerFunc := func(ctx context.Context, _ *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_getJournal(ctx, field)
 				return res
 			}
 
@@ -3109,6 +4299,155 @@ func (ec *executionContext) marshalNBoolean2bool(ctx context.Context, sel ast.Se
 	return res
 }
 
+func (ec *executionContext) unmarshalNID2string(ctx context.Context, v any) (string, error) {
+	res, err := graphql.UnmarshalID(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNID2string(ctx context.Context, sel ast.SelectionSet, v string) graphql.Marshaler {
+	_ = sel
+	res := graphql.MarshalID(v)
+	if res == graphql.Null {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
+		}
+	}
+	return res
+}
+
+func (ec *executionContext) unmarshalNInt2int32(ctx context.Context, v any) (int32, error) {
+	res, err := graphql.UnmarshalInt32(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNInt2int32(ctx context.Context, sel ast.SelectionSet, v int32) graphql.Marshaler {
+	_ = sel
+	res := graphql.MarshalInt32(v)
+	if res == graphql.Null {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
+		}
+	}
+	return res
+}
+
+func (ec *executionContext) marshalNJournal2mindᚑmateᚑserverᚋgraphᚋmodelᚐJournal(ctx context.Context, sel ast.SelectionSet, v model.Journal) graphql.Marshaler {
+	return ec._Journal(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNJournal2ᚕᚖmindᚑmateᚑserverᚋgraphᚋmodelᚐJournalᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.Journal) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNJournal2ᚖmindᚑmateᚑserverᚋgraphᚋmodelᚐJournal(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
+}
+
+func (ec *executionContext) marshalNJournal2ᚖmindᚑmateᚑserverᚋgraphᚋmodelᚐJournal(ctx context.Context, sel ast.SelectionSet, v *model.Journal) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._Journal(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNJournalImage2ᚕᚖmindᚑmateᚑserverᚋgraphᚋmodelᚐJournalImageᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.JournalImage) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNJournalImage2ᚖmindᚑmateᚑserverᚋgraphᚋmodelᚐJournalImage(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
+}
+
+func (ec *executionContext) marshalNJournalImage2ᚖmindᚑmateᚑserverᚋgraphᚋmodelᚐJournalImage(ctx context.Context, sel ast.SelectionSet, v *model.JournalImage) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._JournalImage(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalNJournalInput2mindᚑmateᚑserverᚋgraphᚋmodelᚐJournalInput(ctx context.Context, v any) (model.JournalInput, error) {
+	res, err := ec.unmarshalInputJournalInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
 func (ec *executionContext) unmarshalNString2string(ctx context.Context, v any) (string, error) {
 	res, err := graphql.UnmarshalString(v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -3413,6 +4752,56 @@ func (ec *executionContext) marshalOBoolean2ᚖbool(ctx context.Context, sel ast
 	_ = ctx
 	res := graphql.MarshalBoolean(*v)
 	return res
+}
+
+func (ec *executionContext) marshalOFontSettings2ᚖmindᚑmateᚑserverᚋgraphᚋmodelᚐFontSettings(ctx context.Context, sel ast.SelectionSet, v *model.FontSettings) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._FontSettings(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalOJournal2ᚖmindᚑmateᚑserverᚋgraphᚋmodelᚐJournal(ctx context.Context, sel ast.SelectionSet, v *model.Journal) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._Journal(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalOString2ᚕstringᚄ(ctx context.Context, v any) ([]string, error) {
+	if v == nil {
+		return nil, nil
+	}
+	var vSlice []any
+	vSlice = graphql.CoerceList(v)
+	var err error
+	res := make([]string, len(vSlice))
+	for i := range vSlice {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
+		res[i], err = ec.unmarshalNString2string(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
+func (ec *executionContext) marshalOString2ᚕstringᚄ(ctx context.Context, sel ast.SelectionSet, v []string) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	ret := make(graphql.Array, len(v))
+	for i := range v {
+		ret[i] = ec.marshalNString2string(ctx, sel, v[i])
+	}
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
 }
 
 func (ec *executionContext) unmarshalOString2ᚖstring(ctx context.Context, v any) (*string, error) {
