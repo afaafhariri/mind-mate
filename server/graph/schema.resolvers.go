@@ -20,7 +20,7 @@ import (
 
 // Login is the resolver for the login field.
 func (r *mutationResolver) Login(ctx context.Context, email string) (*string, error) {
-	user, err := repository.GetUserByEmail(ctx, email)
+	user, err := repository.GetUserByEmailForGraphQL(email)
 	if err != nil {
 		return nil, fmt.Errorf("failed to check user: %v", err)
 	}
@@ -29,14 +29,12 @@ func (r *mutationResolver) Login(ctx context.Context, email string) (*string, er
 	}
 
 	otp := generateOTP()
-	if err := repository.SaveOTP(ctx, email, otp); err != nil {
+	if err := repository.SaveOTP(email, otp); err != nil {
 		return nil, err
 	}
 
 	if err := service.SendOTP(email, otp); err != nil {
 		log.Printf("Failed to send OTP: %v", err)
-		// We log but maybe shouldn't fail the whole request if email fails,
-		// but typically we should. The original code threw error.
 		return nil, fmt.Errorf("Failed to initiate login: %v", err)
 	}
 
@@ -46,15 +44,13 @@ func (r *mutationResolver) Login(ctx context.Context, email string) (*string, er
 
 // Signup is the resolver for the signup field.
 func (r *mutationResolver) Signup(ctx context.Context, firstName string, lastName string, email string, dateOfBirth string, city string, country string, profession string, maritalStatus string) (*string, error) {
-	// Construct user model for creation
-	// Actually repository.CreateUser takes individual fields in my implementation step 96
-	err := repository.CreateUser(ctx, email, firstName, lastName, dateOfBirth, city, country, profession, maritalStatus)
+	err := repository.CreateUser(email, firstName, lastName, dateOfBirth, city, country, profession, maritalStatus)
 	if err != nil {
 		return nil, fmt.Errorf("Failed to sign up: %v", err)
 	}
 
 	otp := generateOTP()
-	if err := repository.SaveOTP(ctx, email, otp); err != nil {
+	if err := repository.SaveOTP(email, otp); err != nil {
 		return nil, err
 	}
 
@@ -69,7 +65,7 @@ func (r *mutationResolver) Signup(ctx context.Context, firstName string, lastNam
 
 // VerifyOtp is the resolver for the verifyOTP field.
 func (r *mutationResolver) VerifyOtp(ctx context.Context, email string, otp string) (*model.AuthPayload, error) {
-	isValid, err := repository.VerifyOTP(ctx, email, otp)
+	isValid, err := repository.VerifyOTP(email, otp)
 	if err != nil {
 		return nil, err
 	}
@@ -77,19 +73,14 @@ func (r *mutationResolver) VerifyOtp(ctx context.Context, email string, otp stri
 		return nil, fmt.Errorf("Invalid or expired OTP")
 	}
 
-	user, err := repository.GetUserByEmail(ctx, email)
+	user, err := repository.GetUserByEmailForGraphQL(email)
 	if err != nil {
 		return nil, err
 	}
 	if user == nil {
-		// Should not happen if logic is correct
 		return nil, fmt.Errorf("User not found")
 	}
 
-	// Determine User ID. In this schema/repo, email is the key.
-	// The original code tried to use user.id then user.email.
-	// We'll use email as ID or if the user struct has ID field (it doesn't in gql schema properly, but maybe implicit?)
-	// GQL schema only has fields. Firestore ID is email.
 	token, err := auth.GenerateToken(email, user.Email)
 	if err != nil {
 		return nil, fmt.Errorf("Failed to generate token")
@@ -103,7 +94,7 @@ func (r *mutationResolver) VerifyOtp(ctx context.Context, email string, otp stri
 
 // GetUser is the resolver for the getUser field.
 func (r *queryResolver) GetUser(ctx context.Context, email string) (*model.User, error) {
-	user, err := repository.GetUserByEmail(ctx, email)
+	user, err := repository.GetUserByEmailForGraphQL(email)
 	if err != nil {
 		return nil, err
 	}

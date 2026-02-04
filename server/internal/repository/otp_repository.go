@@ -1,55 +1,54 @@
 package repository
 
 import (
-	"context"
+	"errors"
 	"mind-mate-server/internal/db"
+	"mind-mate-server/internal/model"
 	"time"
 
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
+	"gorm.io/gorm"
 )
 
-func SaveOTP(ctx context.Context, email string, code string) error {
+func SaveOTP(email string, code string) error {
 	expiresAt := time.Now().Add(10 * time.Minute)
-	_, err := db.Client.Collection("otps").Doc(email).Set(ctx, map[string]interface{}{
-		"email":     email,
-		"code":      code,
-		"expiresAt": expiresAt,
-	})
-	return err
+
+	// Delete existing OTP for this email first
+	db.DB.Where("email = ?", email).Delete(&model.OTP{})
+
+	// Create new OTP
+	otp := model.OTP{
+		Email:     email,
+		Code:      code,
+		ExpiresAt: expiresAt,
+	}
+
+	return db.DB.Create(&otp).Error
 }
 
-func VerifyOTP(ctx context.Context, email string, code string) (bool, error) {
-	docRef := db.Client.Collection("otps").Doc(email)
-	doc, err := docRef.Get(ctx)
-	if err != nil {
-		if status.Code(err) == codes.NotFound {
-			return false, nil
-		}
-		return false, err
-	}
+func VerifyOTP(email string, code string) (bool, error) {
+	var otp model.OTP
+	result := db.DB.Where("email = ?", email).First(&otp)
 
-	data := doc.Data()
+	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+		return false, nil // No OTP found
+	}
+	if result.Error != nil {
+		return false, result.Error
+	}
 
 	// Check expiration
-	expiresAtVal, ok := data["expiresAt"].(time.Time)
-	if !ok {
-		// Try cast to Timestamp? Firestore SDK usually returns time.Time for timestamps.
-		// If not, it might be nil
+	if otp.ExpiresAt.Before(time.Now()) {
+		// OTP expired, delete it
+		db.DB.Delete(&otp)
 		return false, nil
 	}
 
-	if expiresAtVal.Before(time.Now()) {
-		docRef.Delete(ctx)
-		return false, nil
-	}
-
-	storedCode, ok := data["code"].(string)
-	if !ok || storedCode != code {
+	// Check code
+	if otp.Code != code {
 		return false, nil
 	}
 
 	// Valid OTP, delete it
-	docRef.Delete(ctx)
+	db.DB.Delete(&otp)
 	return true, nil
 }
