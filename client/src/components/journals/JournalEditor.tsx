@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import {
     Dialog,
     DialogTitle,
@@ -50,20 +50,25 @@ export default function JournalEditor({
     journal,
     loading,
 }: JournalEditorProps) {
-    const [topic, setTopic] = useState(journal?.topic || "");
-    const [body, setBody] = useState(journal?.body || "");
-    const [fontHeading, setFontHeading] = useState(
-        journal?.fontSettings?.heading || "sans-serif"
-    );
-    const [fontBody, setFontBody] = useState(
-        journal?.fontSettings?.body || "sans-serif"
-    );
-    const [images, setImages] = useState<string[]>(
-        journal?.images.map((img) => img.url) || []
-    );
+    const [topic, setTopic] = useState("");
+    const [body, setBody] = useState("");
+    const [fontHeading, setFontHeading] = useState("sans-serif");
+    const [fontBody, setFontBody] = useState("sans-serif");
+    const [images, setImages] = useState<string[]>([]);
     const [uploading, setUploading] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
     const textAreaRef = useRef<HTMLTextAreaElement>(null);
+
+    // Sync form state when dialog opens or journal changes
+    useEffect(() => {
+        if (open) {
+            setTopic(journal?.topic || "");
+            setBody(journal?.body || "");
+            setFontHeading(journal?.fontSettings?.heading || "sans-serif");
+            setFontBody(journal?.fontSettings?.body || "sans-serif");
+            setImages(journal?.images.map((img) => img.url) || []);
+        }
+    }, [open, journal]);
 
     const handleFormat = (type: string) => {
         const textArea = textAreaRef.current;

@@ -26,3 +26,4 @@ server/dist
 server/prisma/
 server/src/generated/
 server/mind-mate-firebase-admin-sdk.json
+server/uploads
