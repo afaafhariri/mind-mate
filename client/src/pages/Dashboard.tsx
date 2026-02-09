@@ -4,12 +4,10 @@ import {
   Typography,
   Paper,
   Grid,
-  LinearProgress,
   Skeleton,
 } from "@mui/material";
 import AutoStoriesIcon from "@mui/icons-material/AutoStories";
 import TrendingUpIcon from "@mui/icons-material/TrendingUp";
-import SentimentSatisfiedAltIcon from "@mui/icons-material/SentimentSatisfiedAlt";
 import InsightsIcon from "@mui/icons-material/Insights";
 import LiveClock from "../components/LiveClock";
 import { ME, type User } from "../graphql/user";
@@ -33,9 +31,30 @@ export default function Dashboard() {
     return journalDate >= weekAgo;
   }).length;
 
-  // Mock mental health score (will be replaced with RAG analysis)
-  const mentalHealthScore = 78;
-  const moodTrend = "Improving";
+  // Calculate streak (consecutive days with journals)
+  const calculateStreak = () => {
+    if (journals.length === 0) return 0;
+    const sortedDates = [...new Set(
+      journals.map((j) => new Date(j.createdAt).toDateString())
+    )].sort((a, b) => new Date(b).getTime() - new Date(a).getTime());
+
+    let streak = 0;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    for (let i = 0; i < sortedDates.length; i++) {
+      const expectedDate = new Date(today);
+      expectedDate.setDate(expectedDate.getDate() - i);
+      if (sortedDates[i] === expectedDate.toDateString()) {
+        streak++;
+      } else {
+        break;
+      }
+    }
+    return streak;
+  };
+
+  const streak = calculateStreak();
 
   return (
     <Box>
@@ -57,7 +76,7 @@ export default function Dashboard() {
             </Typography>
           )}
           <Typography color="text.secondary" sx={{ mt: 0.5 }}>
-            Here's your mental wellness overview
+            Here's your journaling overview
           </Typography>
         </Box>
         <LiveClock />
@@ -66,13 +85,13 @@ export default function Dashboard() {
       {/* Stats Cards */}
       <Grid container spacing={3} sx={{ mb: 4 }}>
         {/* Journal Count Card */}
-        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+        <Grid size={{ xs: 12, sm: 6, md: 4 }}>
           <Paper
             elevation={0}
             sx={{
               p: 3,
               borderRadius: 3,
-              background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+              background: "linear-gradient(135deg, #1976d2 0%, #42a5f5 100%)",
               color: "white",
             }}
           >
@@ -89,13 +108,13 @@ export default function Dashboard() {
         </Grid>
 
         {/* This Week Card */}
-        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+        <Grid size={{ xs: 12, sm: 6, md: 4 }}>
           <Paper
             elevation={0}
             sx={{
               p: 3,
               borderRadius: 3,
-              background: "linear-gradient(135deg, #f093fb 0%, #f5576c 100%)",
+              background: "linear-gradient(135deg, #0288d1 0%, #4fc3f7 100%)",
               color: "white",
             }}
           >
@@ -111,37 +130,14 @@ export default function Dashboard() {
           </Paper>
         </Grid>
 
-        {/* Mental Health Score Card */}
-        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+        {/* Streak Card */}
+        <Grid size={{ xs: 12, sm: 6, md: 4 }}>
           <Paper
             elevation={0}
             sx={{
               p: 3,
               borderRadius: 3,
-              background: "linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)",
-              color: "white",
-            }}
-          >
-            <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
-              <SentimentSatisfiedAltIcon sx={{ fontSize: 32 }} />
-            </Box>
-            <Typography variant="h3" fontWeight={700}>
-              {mentalHealthScore}%
-            </Typography>
-            <Typography variant="body2" sx={{ opacity: 0.9 }}>
-              Wellness Score
-            </Typography>
-          </Paper>
-        </Grid>
-
-        {/* Mood Trend Card */}
-        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-          <Paper
-            elevation={0}
-            sx={{
-              p: 3,
-              borderRadius: 3,
-              background: "linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)",
+              background: "linear-gradient(135deg, #2196f3 0%, #64b5f6 100%)",
               color: "white",
             }}
           >
@@ -149,161 +145,33 @@ export default function Dashboard() {
               <InsightsIcon sx={{ fontSize: 32 }} />
             </Box>
             <Typography variant="h3" fontWeight={700}>
-              {moodTrend}
+              {journalsLoading ? <Skeleton width={60} /> : `${streak} day${streak !== 1 ? "s" : ""}`}
             </Typography>
             <Typography variant="body2" sx={{ opacity: 0.9 }}>
-              Mood Trend
+              Current Streak
             </Typography>
           </Paper>
         </Grid>
       </Grid>
 
-      {/* Charts Section */}
+      {/* Coming Soon Section */}
       <Grid container spacing={3}>
-        {/* Mood Over Time Chart */}
-        <Grid size={{ xs: 12, md: 8 }}>
+        <Grid size={{ xs: 12 }}>
           <Paper
             elevation={2}
             sx={{
-              p: 3,
+              p: 4,
               borderRadius: 3,
-              height: 350,
+              textAlign: "center",
             }}
           >
+            <InsightsIcon sx={{ fontSize: 64, color: "grey.400", mb: 2 }} />
             <Typography variant="h6" fontWeight={600} gutterBottom>
-              Mood Trend Over Time
+              Mental Health Insights Coming Soon
             </Typography>
-            <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-              Your emotional wellness journey based on journal analysis
+            <Typography color="text.secondary">
+              AI-powered mood analysis and wellness tracking will be available in a future update.
             </Typography>
-            {/* Placeholder for chart - will be powered by RAG */}
-            <Box
-              sx={{
-                height: 250,
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                justifyContent: "center",
-                bgcolor: "grey.50",
-                borderRadius: 2,
-                border: "2px dashed",
-                borderColor: "grey.300",
-              }}
-            >
-              <InsightsIcon sx={{ fontSize: 48, color: "grey.400", mb: 2 }} />
-              <Typography color="text.secondary">
-                Chart will be powered by RAG analysis
-              </Typography>
-              <Typography variant="caption" color="text.disabled">
-                Write more journals to see your mood trends
-              </Typography>
-            </Box>
-          </Paper>
-        </Grid>
-
-        {/* Quick Stats */}
-        <Grid size={{ xs: 12, md: 4 }}>
-          <Paper
-            elevation={2}
-            sx={{
-              p: 3,
-              borderRadius: 3,
-              height: 350,
-            }}
-          >
-            <Typography variant="h6" fontWeight={600} gutterBottom>
-              Wellness Breakdown
-            </Typography>
-            <Box sx={{ mt: 3 }}>
-              <Box sx={{ mb: 3 }}>
-                <Box
-                  sx={{ display: "flex", justifyContent: "space-between", mb: 1 }}
-                >
-                  <Typography variant="body2">Emotional Balance</Typography>
-                  <Typography variant="body2" fontWeight={600}>
-                    72%
-                  </Typography>
-                </Box>
-                <LinearProgress
-                  variant="determinate"
-                  value={72}
-                  sx={{
-                    height: 8,
-                    borderRadius: 4,
-                    bgcolor: "grey.200",
-                    "& .MuiLinearProgress-bar": {
-                      bgcolor: "#667eea",
-                    },
-                  }}
-                />
-              </Box>
-              <Box sx={{ mb: 3 }}>
-                <Box
-                  sx={{ display: "flex", justifyContent: "space-between", mb: 1 }}
-                >
-                  <Typography variant="body2">Stress Level</Typography>
-                  <Typography variant="body2" fontWeight={600}>
-                    Low
-                  </Typography>
-                </Box>
-                <LinearProgress
-                  variant="determinate"
-                  value={28}
-                  sx={{
-                    height: 8,
-                    borderRadius: 4,
-                    bgcolor: "grey.200",
-                    "& .MuiLinearProgress-bar": {
-                      bgcolor: "#43e97b",
-                    },
-                  }}
-                />
-              </Box>
-              <Box sx={{ mb: 3 }}>
-                <Box
-                  sx={{ display: "flex", justifyContent: "space-between", mb: 1 }}
-                >
-                  <Typography variant="body2">Journaling Consistency</Typography>
-                  <Typography variant="body2" fontWeight={600}>
-                    85%
-                  </Typography>
-                </Box>
-                <LinearProgress
-                  variant="determinate"
-                  value={85}
-                  sx={{
-                    height: 8,
-                    borderRadius: 4,
-                    bgcolor: "grey.200",
-                    "& .MuiLinearProgress-bar": {
-                      bgcolor: "#f5576c",
-                    },
-                  }}
-                />
-              </Box>
-              <Box>
-                <Box
-                  sx={{ display: "flex", justifyContent: "space-between", mb: 1 }}
-                >
-                  <Typography variant="body2">Self-awareness</Typography>
-                  <Typography variant="body2" fontWeight={600}>
-                    68%
-                  </Typography>
-                </Box>
-                <LinearProgress
-                  variant="determinate"
-                  value={68}
-                  sx={{
-                    height: 8,
-                    borderRadius: 4,
-                    bgcolor: "grey.200",
-                    "& .MuiLinearProgress-bar": {
-                      bgcolor: "#4facfe",
-                    },
-                  }}
-                />
-              </Box>
-            </Box>
           </Paper>
         </Grid>
       </Grid>

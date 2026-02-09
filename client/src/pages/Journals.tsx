@@ -132,13 +132,19 @@ export default function Journals() {
                         My Journals
                     </Typography>
                     <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
-                        <FormControl size="small" sx={{ minWidth: 140 }}>
-                            <InputLabel id="sort-by-label">Sort By</InputLabel>
+                        <FormControl size="small" sx={{ minWidth: 160 }}>
+                            <InputLabel id="sort-by-label" sx={{ bgcolor: "white", px: 0.5 }}>Sort By</InputLabel>
                             <Select
                                 labelId="sort-by-label"
                                 value={sortBy}
                                 label="Sort By"
                                 onChange={handleSortChange}
+                                sx={{
+                                    bgcolor: "white",
+                                    "& .MuiOutlinedInput-notchedOutline": {
+                                        borderColor: "divider",
+                                    },
+                                }}
                             >
                                 <MenuItem value="NEWEST_FIRST">Newest First</MenuItem>
                                 <MenuItem value="OLDEST_FIRST">Oldest First</MenuItem>

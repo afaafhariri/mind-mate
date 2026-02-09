@@ -48,13 +48,13 @@ export default function Sidebar({
       {/* Logo Section */}
       <Box
         sx={{
-          mb: 4,
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
           gap: 0.5,
-          pt: 6,
-          pb: 4,
+          pt: 3,
+          pb: 2,
+          mb: 1,
           width: "100%",
         }}
       >
@@ -63,8 +63,8 @@ export default function Sidebar({
           src="/meditation-round-svgrepo-com.svg"
           alt="Mind Mate Logo"
           sx={{
-            width: 70,
-            height: 70,
+            width: 56,
+            height: 56,
           }}
         />
         <Typography variant="h6" fontWeight="bold" color="primary.main">
@@ -136,7 +136,7 @@ export default function Sidebar({
       </List>
       <Box sx={{ flexGrow: 1 }} />
       {/* Logout */}
-      <List sx={{ width: "100%", px: 2, mb: 10 }}>
+      <List sx={{ width: "100%", px: 2, mb: 4 }}>
         <ListItem disablePadding>
           <ListItemButton
             onClick={() => navigate("/")}
