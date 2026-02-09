@@ -2,6 +2,13 @@
 
 package model
 
+import (
+	"bytes"
+	"fmt"
+	"io"
+	"strconv"
+)
+
 type AuthPayload struct {
 	Token *string `json:"token,omitempty"`
 	User  *User   `json:"user,omitempty"`
@@ -46,6 +53,16 @@ type Mutation struct {
 type Query struct {
 }
 
+type UpdateUserInput struct {
+	FirstName     *string `json:"firstName,omitempty"`
+	LastName      *string `json:"lastName,omitempty"`
+	DateOfBirth   *string `json:"dateOfBirth,omitempty"`
+	City          *string `json:"city,omitempty"`
+	Country       *string `json:"country,omitempty"`
+	Profession    *string `json:"profession,omitempty"`
+	MaritalStatus *string `json:"maritalStatus,omitempty"`
+}
+
 type User struct {
 	Email         string  `json:"email"`
 	FirstName     string  `json:"firstName"`
@@ -55,4 +72,61 @@ type User struct {
 	Country       *string `json:"country,omitempty"`
 	Profession    *string `json:"profession,omitempty"`
 	MaritalStatus *string `json:"maritalStatus,omitempty"`
+}
+
+type SortOrder string
+
+const (
+	SortOrderNewestFirst  SortOrder = "NEWEST_FIRST"
+	SortOrderOldestFirst  SortOrder = "OLDEST_FIRST"
+	SortOrderAlphabetical SortOrder = "ALPHABETICAL"
+)
+
+var AllSortOrder = []SortOrder{
+	SortOrderNewestFirst,
+	SortOrderOldestFirst,
+	SortOrderAlphabetical,
+}
+
+func (e SortOrder) IsValid() bool {
+	switch e {
+	case SortOrderNewestFirst, SortOrderOldestFirst, SortOrderAlphabetical:
+		return true
+	}
+	return false
+}
+
+func (e SortOrder) String() string {
+	return string(e)
+}
+
+func (e *SortOrder) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = SortOrder(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid SortOrder", str)
+	}
+	return nil
+}
+
+func (e SortOrder) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *SortOrder) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e SortOrder) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
 }

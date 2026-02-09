@@ -4,6 +4,7 @@ import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import Dashboard from "./pages/Dashboard";
 import Journals from "./pages/Journals";
+import Profile from "./pages/Profile";
 import DashboardLayout from "./layouts/DashboardLayout";
 import { Splash } from "./pages/Splash";
 
@@ -31,6 +32,7 @@ function App() {
         <Route element={<DashboardLayout />}>
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/journals" element={<Journals />} />
+          <Route path="/profile" element={<Profile />} />
         </Route>
 
         {/* Catch all - redirect to login */}

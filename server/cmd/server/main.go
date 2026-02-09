@@ -11,6 +11,7 @@ import (
 	"github.com/joho/godotenv"
 
 	"mind-mate-server/graph"
+	"mind-mate-server/internal/auth"
 	"mind-mate-server/internal/db"
 	authHandler "mind-mate-server/internal/handler"
 	"mind-mate-server/internal/model"
@@ -54,11 +55,11 @@ func main() {
 	})
 
 	// REST Auth routes
-	auth := router.Group("/api/auth")
+	authRoutes := router.Group("/api/auth")
 	{
-		auth.POST("/signup", authHandler.Signup)
-		auth.POST("/login", authHandler.Login)
-		auth.POST("/verify-otp", authHandler.VerifyOTP)
+		authRoutes.POST("/signup", authHandler.Signup)
+		authRoutes.POST("/login", authHandler.Login)
+		authRoutes.POST("/verify-otp", authHandler.VerifyOTP)
 	}
 
 	// REST Media routes
@@ -78,6 +79,20 @@ func main() {
 	})
 
 	router.POST("/graphql", func(c *gin.Context) {
+		// Extract JWT from Authorization header and set user email in context
+		ctx := c.Request.Context()
+		authHeader := c.GetHeader("Authorization")
+		if authHeader != "" {
+			// Remove "Bearer " prefix if present
+			tokenString := authHeader
+			if len(authHeader) > 7 && authHeader[:7] == "Bearer " {
+				tokenString = authHeader[7:]
+			}
+			if email, err := auth.ParseToken(tokenString); err == nil && email != "" {
+				ctx = auth.SetUserEmailToContext(ctx, email)
+			}
+		}
+		c.Request = c.Request.WithContext(ctx)
 		gqlServer.ServeHTTP(c.Writer, c.Request)
 	})
 

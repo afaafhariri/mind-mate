@@ -2,8 +2,8 @@ import { gql } from "@apollo/client";
 
 // Queries
 export const GET_JOURNALS = gql`
-  query GetJournals {
-    getJournals {
+  query GetJournals($sortBy: SortOrder) {
+    getJournals(sortBy: $sortBy) {
       id
       topic
       body

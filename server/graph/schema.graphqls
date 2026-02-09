@@ -44,8 +44,15 @@ input JournalInput {
 
 type Query {
   getUser(email: String!): User
-  getJournals: [Journal!]!
+  getJournals(sortBy: SortOrder): [Journal!]!
   getJournal(id: ID!): Journal
+  me: User
+}
+
+enum SortOrder {
+  NEWEST_FIRST
+  OLDEST_FIRST
+  ALPHABETICAL
 }
 
 type Mutation {
@@ -63,9 +70,25 @@ type Mutation {
   login(email: String!): String
   verifyOTP(email: String!, otp: String!): AuthPayload
   
+  # Profile mutations
+  updateUser(input: UpdateUserInput!): User!
+  requestEmailChange(newEmail: String!): String!
+  confirmEmailChange(newEmail: String!, otp: String!): User!
+  
+  # Journal mutations  
   createJournal(input: JournalInput!): Journal!
   updateJournal(id: ID!, input: JournalInput!): Journal!
   deleteJournal(id: ID!): Boolean!
+}
+
+input UpdateUserInput {
+  firstName: String
+  lastName: String
+  dateOfBirth: String
+  city: String
+  country: String
+  profession: String
+  maritalStatus: String
 }
 
 type AuthPayload {

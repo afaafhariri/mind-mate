@@ -10,6 +10,7 @@ import {
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import AutoStoriesIcon from "@mui/icons-material/AutoStories";
 import ChatIcon from "@mui/icons-material/Chat";
+import PersonIcon from "@mui/icons-material/Person";
 import LogoutIcon from "@mui/icons-material/Logout";
 import { useNavigate, useLocation } from "react-router-dom";
 
@@ -33,6 +34,7 @@ export default function Sidebar({
     { text: "Dashboard", icon: <DashboardIcon />, path: "/dashboard" },
     { text: "Journals", icon: <AutoStoriesIcon />, path: "/journals" },
     { text: "Chat", icon: <ChatIcon />, path: "/chat" },
+    { text: "Profile", icon: <PersonIcon />, path: "/profile" },
   ];
 
   const drawerContent = (

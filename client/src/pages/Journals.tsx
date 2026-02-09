@@ -12,7 +12,12 @@ import {
     DialogContentText,
     DialogActions,
     Fab,
+    FormControl,
+    InputLabel,
+    Select,
+    MenuItem,
 } from "@mui/material";
+import type { SelectChangeEvent } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import JournalCard from "../components/journals/JournalCard";
 import JournalDetail from "../components/journals/JournalDetail";
@@ -26,16 +31,21 @@ import {
     type JournalInput,
 } from "../graphql/journals";
 
+type SortOrder = "NEWEST_FIRST" | "OLDEST_FIRST" | "ALPHABETICAL";
+
 export default function Journals() {
     const [selectedJournal, setSelectedJournal] = useState<Journal | null>(null);
     const [editorOpen, setEditorOpen] = useState(false);
     const [editingJournal, setEditingJournal] = useState<Journal | undefined>();
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+    const [sortBy, setSortBy] = useState<SortOrder>("NEWEST_FIRST");
 
-    const { data, loading, error } = useQuery<{ getJournals: Journal[] }>(GET_JOURNALS);
+    const { data, loading, error } = useQuery<{ getJournals: Journal[] }>(GET_JOURNALS, {
+        variables: { sortBy },
+    });
 
     const [createJournal, { loading: creating }] = useMutation(CREATE_JOURNAL, {
-        refetchQueries: [{ query: GET_JOURNALS }],
+        refetchQueries: [{ query: GET_JOURNALS, variables: { sortBy } }],
         onCompleted: () => {
             setEditorOpen(false);
             setEditingJournal(undefined);
@@ -43,7 +53,7 @@ export default function Journals() {
     });
 
     const [updateJournal, { loading: updating }] = useMutation<{ updateJournal: Journal }>(UPDATE_JOURNAL, {
-        refetchQueries: [{ query: GET_JOURNALS }],
+        refetchQueries: [{ query: GET_JOURNALS, variables: { sortBy } }],
         onCompleted: (data) => {
             setEditorOpen(false);
             setEditingJournal(undefined);
@@ -52,12 +62,16 @@ export default function Journals() {
     });
 
     const [deleteJournal, { loading: deleting }] = useMutation(DELETE_JOURNAL, {
-        refetchQueries: [{ query: GET_JOURNALS }],
+        refetchQueries: [{ query: GET_JOURNALS, variables: { sortBy } }],
         onCompleted: () => {
             setDeleteDialogOpen(false);
             setSelectedJournal(null);
         },
     });
+
+    const handleSortChange = (event: SelectChangeEvent) => {
+        setSortBy(event.target.value as SortOrder);
+    };
 
     const handleCreate = () => {
         setEditingJournal(undefined);
@@ -111,19 +125,35 @@ export default function Journals() {
                         justifyContent: "space-between",
                         alignItems: "center",
                         mb: 3,
+                        gap: 2,
                     }}
                 >
                     <Typography variant="h5" fontWeight={700}>
                         My Journals
                     </Typography>
-                    <Button
-                        variant="contained"
-                        startIcon={<AddIcon />}
-                        onClick={handleCreate}
-                        sx={{ borderRadius: 2 }}
-                    >
-                        New
-                    </Button>
+                    <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
+                        <FormControl size="small" sx={{ minWidth: 140 }}>
+                            <InputLabel id="sort-by-label">Sort By</InputLabel>
+                            <Select
+                                labelId="sort-by-label"
+                                value={sortBy}
+                                label="Sort By"
+                                onChange={handleSortChange}
+                            >
+                                <MenuItem value="NEWEST_FIRST">Newest First</MenuItem>
+                                <MenuItem value="OLDEST_FIRST">Oldest First</MenuItem>
+                                <MenuItem value="ALPHABETICAL">A-Z</MenuItem>
+                            </Select>
+                        </FormControl>
+                        <Button
+                            variant="contained"
+                            startIcon={<AddIcon />}
+                            onClick={handleCreate}
+                            sx={{ borderRadius: 2 }}
+                        >
+                            New
+                        </Button>
+                    </Box>
                 </Box>
 
                 {loading ? (

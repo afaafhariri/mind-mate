@@ -76,18 +76,22 @@ type ComplexityRoot struct {
 	}
 
 	Mutation struct {
-		CreateJournal func(childComplexity int, input model.JournalInput) int
-		DeleteJournal func(childComplexity int, id string) int
-		Login         func(childComplexity int, email string) int
-		Signup        func(childComplexity int, firstName string, lastName string, email string, dateOfBirth string, city string, country string, profession string, maritalStatus string) int
-		UpdateJournal func(childComplexity int, id string, input model.JournalInput) int
-		VerifyOtp     func(childComplexity int, email string, otp string) int
+		ConfirmEmailChange func(childComplexity int, newEmail string, otp string) int
+		CreateJournal      func(childComplexity int, input model.JournalInput) int
+		DeleteJournal      func(childComplexity int, id string) int
+		Login              func(childComplexity int, email string) int
+		RequestEmailChange func(childComplexity int, newEmail string) int
+		Signup             func(childComplexity int, firstName string, lastName string, email string, dateOfBirth string, city string, country string, profession string, maritalStatus string) int
+		UpdateJournal      func(childComplexity int, id string, input model.JournalInput) int
+		UpdateUser         func(childComplexity int, input model.UpdateUserInput) int
+		VerifyOtp          func(childComplexity int, email string, otp string) int
 	}
 
 	Query struct {
 		GetJournal  func(childComplexity int, id string) int
-		GetJournals func(childComplexity int) int
+		GetJournals func(childComplexity int, sortBy *model.SortOrder) int
 		GetUser     func(childComplexity int, email string) int
+		Me          func(childComplexity int) int
 	}
 
 	User struct {
@@ -106,14 +110,18 @@ type MutationResolver interface {
 	Signup(ctx context.Context, firstName string, lastName string, email string, dateOfBirth string, city string, country string, profession string, maritalStatus string) (*string, error)
 	Login(ctx context.Context, email string) (*string, error)
 	VerifyOtp(ctx context.Context, email string, otp string) (*model.AuthPayload, error)
+	UpdateUser(ctx context.Context, input model.UpdateUserInput) (*model.User, error)
+	RequestEmailChange(ctx context.Context, newEmail string) (string, error)
+	ConfirmEmailChange(ctx context.Context, newEmail string, otp string) (*model.User, error)
 	CreateJournal(ctx context.Context, input model.JournalInput) (*model.Journal, error)
 	UpdateJournal(ctx context.Context, id string, input model.JournalInput) (*model.Journal, error)
 	DeleteJournal(ctx context.Context, id string) (bool, error)
 }
 type QueryResolver interface {
 	GetUser(ctx context.Context, email string) (*model.User, error)
-	GetJournals(ctx context.Context) ([]*model.Journal, error)
+	GetJournals(ctx context.Context, sortBy *model.SortOrder) ([]*model.Journal, error)
 	GetJournal(ctx context.Context, id string) (*model.Journal, error)
+	Me(ctx context.Context) (*model.User, error)
 }
 
 type executableSchema struct {
@@ -235,6 +243,17 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 
 		return e.complexity.JournalImage.URL(childComplexity), true
 
+	case "Mutation.confirmEmailChange":
+		if e.complexity.Mutation.ConfirmEmailChange == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_confirmEmailChange_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.ConfirmEmailChange(childComplexity, args["newEmail"].(string), args["otp"].(string)), true
 	case "Mutation.createJournal":
 		if e.complexity.Mutation.CreateJournal == nil {
 			break
@@ -268,6 +287,17 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.Mutation.Login(childComplexity, args["email"].(string)), true
+	case "Mutation.requestEmailChange":
+		if e.complexity.Mutation.RequestEmailChange == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_requestEmailChange_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.RequestEmailChange(childComplexity, args["newEmail"].(string)), true
 	case "Mutation.signup":
 		if e.complexity.Mutation.Signup == nil {
 			break
@@ -290,6 +320,17 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.Mutation.UpdateJournal(childComplexity, args["id"].(string), args["input"].(model.JournalInput)), true
+	case "Mutation.updateUser":
+		if e.complexity.Mutation.UpdateUser == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_updateUser_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.UpdateUser(childComplexity, args["input"].(model.UpdateUserInput)), true
 	case "Mutation.verifyOTP":
 		if e.complexity.Mutation.VerifyOtp == nil {
 			break
@@ -318,7 +359,12 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			break
 		}
 
-		return e.complexity.Query.GetJournals(childComplexity), true
+		args, err := ec.field_Query_getJournals_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.GetJournals(childComplexity, args["sortBy"].(*model.SortOrder)), true
 	case "Query.getUser":
 		if e.complexity.Query.GetUser == nil {
 			break
@@ -330,6 +376,12 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.Query.GetUser(childComplexity, args["email"].(string)), true
+	case "Query.me":
+		if e.complexity.Query.Me == nil {
+			break
+		}
+
+		return e.complexity.Query.Me(childComplexity), true
 
 	case "User.city":
 		if e.complexity.User.City == nil {
@@ -389,6 +441,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 	ec := executionContext{opCtx, e, 0, 0, make(chan graphql.DeferredResult)}
 	inputUnmarshalMap := graphql.BuildUnmarshalerMap(
 		ec.unmarshalInputJournalInput,
+		ec.unmarshalInputUpdateUserInput,
 	)
 	first := true
 
@@ -505,6 +558,22 @@ var parsedSchema = gqlparser.MustLoadSchema(sources...)
 
 // region    ***************************** args.gotpl *****************************
 
+func (ec *executionContext) field_Mutation_confirmEmailChange_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "newEmail", ec.unmarshalNString2string)
+	if err != nil {
+		return nil, err
+	}
+	args["newEmail"] = arg0
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "otp", ec.unmarshalNString2string)
+	if err != nil {
+		return nil, err
+	}
+	args["otp"] = arg1
+	return args, nil
+}
+
 func (ec *executionContext) field_Mutation_createJournal_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
@@ -535,6 +604,17 @@ func (ec *executionContext) field_Mutation_login_args(ctx context.Context, rawAr
 		return nil, err
 	}
 	args["email"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_requestEmailChange_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "newEmail", ec.unmarshalNString2string)
+	if err != nil {
+		return nil, err
+	}
+	args["newEmail"] = arg0
 	return args, nil
 }
 
@@ -600,6 +680,17 @@ func (ec *executionContext) field_Mutation_updateJournal_args(ctx context.Contex
 	return args, nil
 }
 
+func (ec *executionContext) field_Mutation_updateUser_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNUpdateUserInput2mindᚑmateᚑserverᚋgraphᚋmodelᚐUpdateUserInput)
+	if err != nil {
+		return nil, err
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
 func (ec *executionContext) field_Mutation_verifyOTP_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
@@ -635,6 +726,17 @@ func (ec *executionContext) field_Query_getJournal_args(ctx context.Context, raw
 		return nil, err
 	}
 	args["id"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_getJournals_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "sortBy", ec.unmarshalOSortOrder2ᚖmindᚑmateᚑserverᚋgraphᚋmodelᚐSortOrder)
+	if err != nil {
+		return nil, err
+	}
+	args["sortBy"] = arg0
 	return args, nil
 }
 
@@ -1330,6 +1432,165 @@ func (ec *executionContext) fieldContext_Mutation_verifyOTP(ctx context.Context,
 	return fc, nil
 }
 
+func (ec *executionContext) _Mutation_updateUser(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Mutation_updateUser,
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.resolvers.Mutation().UpdateUser(ctx, fc.Args["input"].(model.UpdateUserInput))
+		},
+		nil,
+		ec.marshalNUser2ᚖmindᚑmateᚑserverᚋgraphᚋmodelᚐUser,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Mutation_updateUser(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "email":
+				return ec.fieldContext_User_email(ctx, field)
+			case "firstName":
+				return ec.fieldContext_User_firstName(ctx, field)
+			case "lastName":
+				return ec.fieldContext_User_lastName(ctx, field)
+			case "dateOfBirth":
+				return ec.fieldContext_User_dateOfBirth(ctx, field)
+			case "city":
+				return ec.fieldContext_User_city(ctx, field)
+			case "country":
+				return ec.fieldContext_User_country(ctx, field)
+			case "profession":
+				return ec.fieldContext_User_profession(ctx, field)
+			case "maritalStatus":
+				return ec.fieldContext_User_maritalStatus(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_updateUser_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_requestEmailChange(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Mutation_requestEmailChange,
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.resolvers.Mutation().RequestEmailChange(ctx, fc.Args["newEmail"].(string))
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Mutation_requestEmailChange(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_requestEmailChange_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_confirmEmailChange(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Mutation_confirmEmailChange,
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.resolvers.Mutation().ConfirmEmailChange(ctx, fc.Args["newEmail"].(string), fc.Args["otp"].(string))
+		},
+		nil,
+		ec.marshalNUser2ᚖmindᚑmateᚑserverᚋgraphᚋmodelᚐUser,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Mutation_confirmEmailChange(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "email":
+				return ec.fieldContext_User_email(ctx, field)
+			case "firstName":
+				return ec.fieldContext_User_firstName(ctx, field)
+			case "lastName":
+				return ec.fieldContext_User_lastName(ctx, field)
+			case "dateOfBirth":
+				return ec.fieldContext_User_dateOfBirth(ctx, field)
+			case "city":
+				return ec.fieldContext_User_city(ctx, field)
+			case "country":
+				return ec.fieldContext_User_country(ctx, field)
+			case "profession":
+				return ec.fieldContext_User_profession(ctx, field)
+			case "maritalStatus":
+				return ec.fieldContext_User_maritalStatus(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_confirmEmailChange_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Mutation_createJournal(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
@@ -1551,7 +1812,8 @@ func (ec *executionContext) _Query_getJournals(ctx context.Context, field graphq
 		field,
 		ec.fieldContext_Query_getJournals,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Query().GetJournals(ctx)
+			fc := graphql.GetFieldContext(ctx)
+			return ec.resolvers.Query().GetJournals(ctx, fc.Args["sortBy"].(*model.SortOrder))
 		},
 		nil,
 		ec.marshalNJournal2ᚕᚖmindᚑmateᚑserverᚋgraphᚋmodelᚐJournalᚄ,
@@ -1560,7 +1822,7 @@ func (ec *executionContext) _Query_getJournals(ctx context.Context, field graphq
 	)
 }
 
-func (ec *executionContext) fieldContext_Query_getJournals(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Query_getJournals(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Query",
 		Field:      field,
@@ -1585,6 +1847,17 @@ func (ec *executionContext) fieldContext_Query_getJournals(_ context.Context, fi
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Journal", field.Name)
 		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_getJournals_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
 	}
 	return fc, nil
 }
@@ -1642,6 +1915,53 @@ func (ec *executionContext) fieldContext_Query_getJournal(ctx context.Context, f
 	if fc.Args, err = ec.field_Query_getJournal_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_me(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Query_me,
+		func(ctx context.Context) (any, error) {
+			return ec.resolvers.Query().Me(ctx)
+		},
+		nil,
+		ec.marshalOUser2ᚖmindᚑmateᚑserverᚋgraphᚋmodelᚐUser,
+		true,
+		false,
+	)
+}
+
+func (ec *executionContext) fieldContext_Query_me(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "email":
+				return ec.fieldContext_User_email(ctx, field)
+			case "firstName":
+				return ec.fieldContext_User_firstName(ctx, field)
+			case "lastName":
+				return ec.fieldContext_User_lastName(ctx, field)
+			case "dateOfBirth":
+				return ec.fieldContext_User_dateOfBirth(ctx, field)
+			case "city":
+				return ec.fieldContext_User_city(ctx, field)
+			case "country":
+				return ec.fieldContext_User_country(ctx, field)
+			case "profession":
+				return ec.fieldContext_User_profession(ctx, field)
+			case "maritalStatus":
+				return ec.fieldContext_User_maritalStatus(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
+		},
 	}
 	return fc, nil
 }
@@ -3501,6 +3821,75 @@ func (ec *executionContext) unmarshalInputJournalInput(ctx context.Context, obj 
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputUpdateUserInput(ctx context.Context, obj any) (model.UpdateUserInput, error) {
+	var it model.UpdateUserInput
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"firstName", "lastName", "dateOfBirth", "city", "country", "profession", "maritalStatus"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "firstName":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("firstName"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.FirstName = data
+		case "lastName":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("lastName"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.LastName = data
+		case "dateOfBirth":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("dateOfBirth"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.DateOfBirth = data
+		case "city":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("city"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.City = data
+		case "country":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("country"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Country = data
+		case "profession":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("profession"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Profession = data
+		case "maritalStatus":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("maritalStatus"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.MaritalStatus = data
+		}
+	}
+
+	return it, nil
+}
+
 // endregion **************************** input.gotpl *****************************
 
 // region    ************************** interface.gotpl ***************************
@@ -3735,6 +4124,27 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_verifyOTP(ctx, field)
 			})
+		case "updateUser":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_updateUser(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "requestEmailChange":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_requestEmailChange(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "confirmEmailChange":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_confirmEmailChange(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
 		case "createJournal":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_createJournal(ctx, field)
@@ -3849,6 +4259,25 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_getJournal(ctx, field)
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "me":
+			field := field
+
+			innerFunc := func(ctx context.Context, _ *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_me(ctx, field)
 				return res
 			}
 
@@ -4464,6 +4893,25 @@ func (ec *executionContext) marshalNString2string(ctx context.Context, sel ast.S
 	return res
 }
 
+func (ec *executionContext) unmarshalNUpdateUserInput2mindᚑmateᚑserverᚋgraphᚋmodelᚐUpdateUserInput(ctx context.Context, v any) (model.UpdateUserInput, error) {
+	res, err := ec.unmarshalInputUpdateUserInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNUser2mindᚑmateᚑserverᚋgraphᚋmodelᚐUser(ctx context.Context, sel ast.SelectionSet, v model.User) graphql.Marshaler {
+	return ec._User(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNUser2ᚖmindᚑmateᚑserverᚋgraphᚋmodelᚐUser(ctx context.Context, sel ast.SelectionSet, v *model.User) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._User(ctx, sel, v)
+}
+
 func (ec *executionContext) marshalN__Directive2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐDirective(ctx context.Context, sel ast.SelectionSet, v introspection.Directive) graphql.Marshaler {
 	return ec.___Directive(ctx, sel, &v)
 }
@@ -4766,6 +5214,22 @@ func (ec *executionContext) marshalOJournal2ᚖmindᚑmateᚑserverᚋgraphᚋmo
 		return graphql.Null
 	}
 	return ec._Journal(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalOSortOrder2ᚖmindᚑmateᚑserverᚋgraphᚋmodelᚐSortOrder(ctx context.Context, v any) (*model.SortOrder, error) {
+	if v == nil {
+		return nil, nil
+	}
+	var res = new(model.SortOrder)
+	err := res.UnmarshalGQL(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOSortOrder2ᚖmindᚑmateᚑserverᚋgraphᚋmodelᚐSortOrder(ctx context.Context, sel ast.SelectionSet, v *model.SortOrder) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return v
 }
 
 func (ec *executionContext) unmarshalOString2ᚕstringᚄ(ctx context.Context, v any) ([]string, error) {

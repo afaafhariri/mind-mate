@@ -89,6 +89,85 @@ func (r *mutationResolver) VerifyOtp(ctx context.Context, email string, otp stri
 	}, nil
 }
 
+// UpdateUser is the resolver for the updateUser field.
+func (r *mutationResolver) UpdateUser(ctx context.Context, input model.UpdateUserInput) (*model.User, error) {
+	email := auth.GetUserEmailFromContext(ctx)
+	if email == "" {
+		return nil, fmt.Errorf("not authenticated")
+	}
+
+	user, err := repository.UpdateUser(
+		email,
+		input.FirstName,
+		input.LastName,
+		input.DateOfBirth,
+		input.City,
+		input.Country,
+		input.Profession,
+		input.MaritalStatus,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	return user, nil
+}
+
+// RequestEmailChange is the resolver for the requestEmailChange field.
+func (r *mutationResolver) RequestEmailChange(ctx context.Context, newEmail string) (string, error) {
+	currentEmail := auth.GetUserEmailFromContext(ctx)
+	if currentEmail == "" {
+		return "", fmt.Errorf("not authenticated")
+	}
+
+	// Verify new email is not already in use
+	existingUser, err := repository.GetUserByEmailForGraphQL(newEmail)
+	if err != nil {
+		return "", fmt.Errorf("failed to check email: %v", err)
+	}
+	if existingUser != nil {
+		return "", fmt.Errorf("email already in use")
+	}
+
+	// Generate and send OTP to NEW email
+	otp := generateOTP()
+	if err := repository.SaveOTP(newEmail, otp); err != nil {
+		return "", err
+	}
+
+	if err := service.SendOTP(newEmail, otp); err != nil {
+		log.Printf("Failed to send OTP: %v", err)
+		return "", fmt.Errorf("failed to send verification code")
+	}
+
+	return fmt.Sprintf("Verification code sent to %s", newEmail), nil
+}
+
+// ConfirmEmailChange is the resolver for the confirmEmailChange field.
+func (r *mutationResolver) ConfirmEmailChange(ctx context.Context, newEmail string, otp string) (*model.User, error) {
+	currentEmail := auth.GetUserEmailFromContext(ctx)
+	if currentEmail == "" {
+		return nil, fmt.Errorf("not authenticated")
+	}
+
+	// Verify OTP for the new email
+	isValid, err := repository.VerifyOTP(newEmail, otp)
+	if err != nil {
+		return nil, err
+	}
+	if !isValid {
+		return nil, fmt.Errorf("invalid or expired verification code")
+	}
+
+	// Update email
+	user, err := repository.UpdateUserEmail(currentEmail, newEmail)
+	if err != nil {
+		return nil, err
+	}
+
+	return user, nil
+}
+
 // CreateJournal is the resolver for the createJournal field.
 func (r *mutationResolver) CreateJournal(ctx context.Context, input model.JournalInput) (*model.Journal, error) {
 	// For now, use userID 1 - in real implementation, get from auth context
@@ -172,11 +251,18 @@ func (r *queryResolver) GetUser(ctx context.Context, email string) (*model.User,
 }
 
 // GetJournals is the resolver for the getJournals field.
-func (r *queryResolver) GetJournals(ctx context.Context) ([]*model.Journal, error) {
+func (r *queryResolver) GetJournals(ctx context.Context, sortBy *model.SortOrder) ([]*model.Journal, error) {
 	// For now, use userID 1 - in real implementation, get from auth context
 	userID := uint(1)
 
-	journals, err := repository.GetJournalsByUserID(userID)
+	// Convert SortOrder enum to string for repository
+	var sortByStr *string
+	if sortBy != nil {
+		s := sortBy.String()
+		sortByStr = &s
+	}
+
+	journals, err := repository.GetJournalsByUserID(userID, sortByStr)
 	if err != nil {
 		return nil, err
 	}
@@ -205,6 +291,23 @@ func (r *queryResolver) GetJournal(ctx context.Context, id string) (*model.Journ
 	}
 
 	return convertJournalToGraphQL(journal), nil
+}
+
+// Me is the resolver for the me field.
+func (r *queryResolver) Me(ctx context.Context) (*model.User, error) {
+	email := auth.GetUserEmailFromContext(ctx)
+	if email == "" {
+		return nil, fmt.Errorf("not authenticated")
+	}
+
+	user, err := repository.GetUserByEmailForGraphQL(email)
+	if err != nil {
+		return nil, err
+	}
+	if user == nil {
+		return nil, fmt.Errorf("user not found")
+	}
+	return user, nil
 }
 
 // Mutation returns MutationResolver implementation.

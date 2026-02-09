@@ -59,14 +59,28 @@ func CreateJournal(userID uint, topic, body string, fontHeading, fontSubheading,
 	return &journal, nil
 }
 
-// GetJournalsByUserID returns all journals for a user
-func GetJournalsByUserID(userID uint) ([]model.Journal, error) {
+// GetJournalsByUserID returns all journals for a user with optional sorting
+func GetJournalsByUserID(userID uint, sortBy *string) ([]model.Journal, error) {
 	var journals []model.Journal
+
+	// Determine sort order
+	orderClause := "created_at DESC" // default: newest first
+	if sortBy != nil {
+		switch *sortBy {
+		case "OLDEST_FIRST":
+			orderClause = "created_at ASC"
+		case "ALPHABETICAL":
+			orderClause = "topic ASC"
+		case "NEWEST_FIRST":
+			orderClause = "created_at DESC"
+		}
+	}
+
 	result := db.DB.Where("user_id = ?", userID).
 		Preload("Images", func(db *gorm.DB) *gorm.DB {
 			return db.Order("sort_order ASC")
 		}).
-		Order("created_at DESC").
+		Order(orderClause).
 		Find(&journals)
 	return journals, result.Error
 }
