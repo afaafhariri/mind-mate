@@ -15,6 +15,7 @@ import (
 	"mind-mate-server/internal/db"
 	authHandler "mind-mate-server/internal/handler"
 	"mind-mate-server/internal/model"
+	"mind-mate-server/internal/service"
 )
 
 func main() {
@@ -33,10 +34,16 @@ func main() {
 	defer db.ClosePostgres()
 
 	// Auto-migrate models
-	if err := db.AutoMigrate(&model.User{}, &model.OTP{}, &model.Journal{}, &model.JournalImage{}); err != nil {
+	if err := db.AutoMigrate(&model.User{}, &model.OTP{}, &model.Journal{}, &model.JournalImage{}, &model.JournalEmbedding{}); err != nil {
 		log.Fatalf("Failed to auto-migrate: %v", err)
 	}
 	log.Println("Database migrations completed successfully")
+
+	// Initialize RAG Service
+	ragService, err := service.NewRAGService()
+	if err != nil {
+		log.Printf("Warning: Failed to initialize RAG service: %v. AI features will be disabled.", err)
+	}
 
 	// Create Gin router
 	router := gin.Default()
@@ -68,11 +75,29 @@ func main() {
 		media.POST("/upload", authHandler.UploadMedia)
 	}
 
+	// REST RAG routes
+	if ragService != nil {
+		ragHandler := authHandler.NewRAGHandler(ragService)
+		ragRoutes := router.Group("/api/rag")
+		{
+			// Middleware to ensure authentication can be added here if needed
+			ragRoutes.POST("/chat", ragHandler.Chat)
+			ragRoutes.POST("/summary", ragHandler.Summary)
+			ragRoutes.POST("/pattern", ragHandler.PatternRecognition)
+			ragRoutes.POST("/mood", ragHandler.MoodAnalysis)
+			ragRoutes.POST("/assistant", ragHandler.WritingAssistant)
+		}
+	}
+
 	// Serve uploaded files
 	router.Static("/uploads", "./uploads")
 
 	// GraphQL routes (kept for future use)
-	gqlServer := handler.NewDefaultServer(graph.NewExecutableSchema(graph.Config{Resolvers: &graph.Resolver{}}))
+	// Inject RAGService into Resolver
+	resolver := &graph.Resolver{
+		RAGService: ragService,
+	}
+	gqlServer := handler.NewDefaultServer(graph.NewExecutableSchema(graph.Config{Resolvers: resolver}))
 
 	router.GET("/", func(c *gin.Context) {
 		playground.Handler("GraphQL playground", "/graphql").ServeHTTP(c.Writer, c.Request)
@@ -97,7 +122,8 @@ func main() {
 	})
 
 	log.Printf("Server running at http://localhost:%s/", port)
-	log.Printf("REST Auth endpoints: /api/auth/signup, /api/auth/login, /api/auth/verify-otp")
+	log.Printf("REST Auth endpoints: /api/auth/ ...")
+	log.Printf("REST RAG endpoints: /api/rag/ ...")
 	log.Printf("GraphQL playground: http://localhost:%s/", port)
 
 	router.Run(":" + port)

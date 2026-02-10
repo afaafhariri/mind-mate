@@ -2,6 +2,7 @@ package repository
 
 import (
 	"errors"
+
 	"mind-mate-server/internal/db"
 	"mind-mate-server/internal/model"
 

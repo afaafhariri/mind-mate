@@ -5,4 +5,8 @@ package graph
 // It serves as dependency injection for your app, add any dependencies you require
 // here.
 
-type Resolver struct{}
+import "mind-mate-server/internal/service"
+
+type Resolver struct {
+	RAGService *service.RAGService
+}

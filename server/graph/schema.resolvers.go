@@ -192,6 +192,21 @@ func (r *mutationResolver) CreateJournal(ctx context.Context, input model.Journa
 		return nil, err
 	}
 
+	// Generate Embedding asynchronously
+	if r.RAGService != nil {
+		go func() {
+			text := fmt.Sprintf("Topic: %s\nBody: %s", journal.Topic, journal.Body)
+			embedding, err := r.RAGService.GenerateEmbedding(context.Background(), text)
+			if err != nil {
+				log.Printf("Failed to generate embedding for journal %d: %v", journal.ID, err)
+				return
+			}
+			if err := repository.UpdateJournalEmbedding(journal.ID, embedding); err != nil {
+				log.Printf("Failed to save embedding for journal %d: %v", journal.ID, err)
+			}
+		}()
+	}
+
 	return convertJournalToGraphQL(journal), nil
 }
 
