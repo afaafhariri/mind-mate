@@ -12,10 +12,8 @@ import (
 func SaveOTP(email string, code string) error {
 	expiresAt := time.Now().Add(10 * time.Minute)
 
-	// Delete existing OTP for this email first
 	db.DB.Where("email = ?", email).Delete(&model.OTP{})
 
-	// Create new OTP
 	otp := model.OTP{
 		Email:     email,
 		Code:      code,
@@ -36,19 +34,14 @@ func VerifyOTP(email string, code string) (bool, error) {
 		return false, result.Error
 	}
 
-	// Check expiration
 	if otp.ExpiresAt.Before(time.Now()) {
-		// OTP expired, delete it
 		db.DB.Delete(&otp)
 		return false, nil
 	}
 
-	// Check code
 	if otp.Code != code {
 		return false, nil
 	}
-
-	// Valid OTP, delete it
 	db.DB.Delete(&otp)
 	return true, nil
 }

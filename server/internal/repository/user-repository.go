@@ -11,7 +11,6 @@ import (
 )
 
 func CreateUser(email string, firstName string, lastName string, dateOfBirth string, city string, country string, profession string, maritalStatus string) error {
-	// Check if user already exists
 	var existingUser model.User
 	result := db.DB.Where("email = ?", email).First(&existingUser)
 	if result.Error == nil {
@@ -21,7 +20,6 @@ func CreateUser(email string, firstName string, lastName string, dateOfBirth str
 		return result.Error
 	}
 
-	// Create new user
 	user := model.User{
 		Email:         email,
 		FirstName:     firstName,
@@ -36,7 +34,6 @@ func CreateUser(email string, firstName string, lastName string, dateOfBirth str
 	return db.DB.Create(&user).Error
 }
 
-// GetUserByEmail returns a User for REST handlers
 func GetUserByEmail(email string) (*model.User, error) {
 	var user model.User
 	result := db.DB.Where("email = ?", email).First(&user)
@@ -49,7 +46,6 @@ func GetUserByEmail(email string) (*model.User, error) {
 	return &user, nil
 }
 
-// GetUserByEmailForGraphQL returns a GraphQL User model
 func GetUserByEmailForGraphQL(email string) (*gqlmodel.User, error) {
 	var user model.User
 	result := db.DB.Where("email = ?", email).First(&user)
@@ -72,7 +68,6 @@ func GetUserByEmailForGraphQL(email string) (*gqlmodel.User, error) {
 	}, nil
 }
 
-// UpdateUser updates non-email user fields
 func UpdateUser(email string, firstName, lastName, dateOfBirth, city, country, profession, maritalStatus *string) (*gqlmodel.User, error) {
 	var user model.User
 	result := db.DB.Where("email = ?", email).First(&user)
@@ -83,7 +78,6 @@ func UpdateUser(email string, firstName, lastName, dateOfBirth, city, country, p
 		return nil, result.Error
 	}
 
-	// Update only provided fields
 	if firstName != nil {
 		user.FirstName = *firstName
 	}
@@ -122,9 +116,7 @@ func UpdateUser(email string, firstName, lastName, dateOfBirth, city, country, p
 	}, nil
 }
 
-// UpdateUserEmail changes the user's email address
 func UpdateUserEmail(oldEmail, newEmail string) (*gqlmodel.User, error) {
-	// Check if new email is already taken
 	var existingUser model.User
 	result := db.DB.Where("email = ?", newEmail).First(&existingUser)
 	if result.Error == nil {
@@ -134,7 +126,6 @@ func UpdateUserEmail(oldEmail, newEmail string) (*gqlmodel.User, error) {
 		return nil, result.Error
 	}
 
-	// Get and update user
 	var user model.User
 	result = db.DB.Where("email = ?", oldEmail).First(&user)
 	if errors.Is(result.Error, gorm.ErrRecordNotFound) {

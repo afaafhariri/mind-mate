@@ -18,9 +18,6 @@ func GenerateToken(userId string, email string) (string, error) {
 		secret = "my_secret_key"
 	}
 
-	// Parse duration, default 30 days
-	// Node used "30d". Go time.ParseDuration doesn't support 'd'.
-	// We'll implement simple logic or just assume 30 days.
 	expiration := time.Hour * 24 * 30
 
 	claims := jwt.MapClaims{
@@ -33,7 +30,6 @@ func GenerateToken(userId string, email string) (string, error) {
 	return token.SignedString([]byte(secret))
 }
 
-// ParseToken validates a JWT token and returns the email
 func ParseToken(tokenString string) (string, error) {
 	secret := os.Getenv("JWT_SECRET")
 	if secret == "" {
@@ -55,13 +51,11 @@ func ParseToken(tokenString string) (string, error) {
 	return "", jwt.ErrSignatureInvalid
 }
 
-// GetUserEmailFromContext retrieves the user email from context
 func GetUserEmailFromContext(ctx context.Context) string {
 	email, _ := ctx.Value(UserEmailKey).(string)
 	return email
 }
 
-// SetUserEmailToContext adds user email to context
 func SetUserEmailToContext(ctx context.Context, email string) context.Context {
 	return context.WithValue(ctx, UserEmailKey, email)
 }

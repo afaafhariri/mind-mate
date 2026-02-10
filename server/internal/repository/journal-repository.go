@@ -9,7 +9,6 @@ import (
 	"gorm.io/gorm"
 )
 
-// CreateJournal creates a new journal with optional images
 func CreateJournal(userID uint, topic, body string, fontHeading, fontSubheading, fontBody, fontMono *string, imageUrls []string) (*model.Journal, error) {
 	journal := model.Journal{
 		UserID:         userID,
@@ -21,19 +20,15 @@ func CreateJournal(userID uint, topic, body string, fontHeading, fontSubheading,
 		FontMono:       fontMono,
 	}
 
-	// Start transaction
 	tx := db.DB.Begin()
 	if tx.Error != nil {
 		return nil, tx.Error
 	}
-
-	// Create journal
 	if err := tx.Create(&journal).Error; err != nil {
 		tx.Rollback()
 		return nil, err
 	}
 
-	// Create images if provided
 	if len(imageUrls) > 0 {
 		for i, url := range imageUrls {
 			image := model.JournalImage{
@@ -52,7 +47,6 @@ func CreateJournal(userID uint, topic, body string, fontHeading, fontSubheading,
 		return nil, err
 	}
 
-	// Reload with images
 	if err := db.DB.Preload("Images").First(&journal, journal.ID).Error; err != nil {
 		return nil, err
 	}
@@ -60,12 +54,10 @@ func CreateJournal(userID uint, topic, body string, fontHeading, fontSubheading,
 	return &journal, nil
 }
 
-// GetJournalsByUserID returns all journals for a user with optional sorting
 func GetJournalsByUserID(userID uint, sortBy *string) ([]model.Journal, error) {
 	var journals []model.Journal
 
-	// Determine sort order
-	orderClause := "created_at DESC" // default: newest first
+	orderClause := "created_at DESC"
 	if sortBy != nil {
 		switch *sortBy {
 		case "OLDEST_FIRST":
@@ -86,7 +78,6 @@ func GetJournalsByUserID(userID uint, sortBy *string) ([]model.Journal, error) {
 	return journals, result.Error
 }
 
-// GetJournalByID returns a journal by ID
 func GetJournalByID(id uint) (*model.Journal, error) {
 	var journal model.Journal
 	result := db.DB.Preload("Images", func(db *gorm.DB) *gorm.DB {
@@ -102,7 +93,6 @@ func GetJournalByID(id uint) (*model.Journal, error) {
 	return &journal, nil
 }
 
-// UpdateJournal updates a journal
 func UpdateJournal(id uint, topic, body string, fontHeading, fontSubheading, fontBody, fontMono *string, imageUrls []string) (*model.Journal, error) {
 	var journal model.Journal
 	if err := db.DB.First(&journal, id).Error; err != nil {
@@ -117,7 +107,6 @@ func UpdateJournal(id uint, topic, body string, fontHeading, fontSubheading, fon
 		return nil, tx.Error
 	}
 
-	// Update journal fields
 	journal.Topic = topic
 	journal.Body = body
 	journal.FontHeading = fontHeading
@@ -130,13 +119,10 @@ func UpdateJournal(id uint, topic, body string, fontHeading, fontSubheading, fon
 		return nil, err
 	}
 
-	// Delete existing images and recreate
 	if err := tx.Where("journal_id = ?", id).Delete(&model.JournalImage{}).Error; err != nil {
 		tx.Rollback()
 		return nil, err
 	}
-
-	// Create new images
 	if len(imageUrls) > 0 {
 		for i, url := range imageUrls {
 			image := model.JournalImage{
@@ -155,7 +141,6 @@ func UpdateJournal(id uint, topic, body string, fontHeading, fontSubheading, fon
 		return nil, err
 	}
 
-	// Reload with images
 	if err := db.DB.Preload("Images").First(&journal, id).Error; err != nil {
 		return nil, err
 	}
@@ -163,7 +148,6 @@ func UpdateJournal(id uint, topic, body string, fontHeading, fontSubheading, fon
 	return &journal, nil
 }
 
-// DeleteJournal deletes a journal by ID
 func DeleteJournal(id uint) error {
 	result := db.DB.Delete(&model.Journal{}, id)
 	if result.RowsAffected == 0 {

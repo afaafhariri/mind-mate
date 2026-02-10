@@ -9,13 +9,11 @@ import (
 	dbmodel "mind-mate-server/internal/model"
 )
 
-// generateOTP generates a 6-digit OTP code
 func generateOTP() string {
 	r := rand.New(rand.NewSource(time.Now().UnixNano()))
 	return strconv.Itoa(100000 + r.Intn(900000))
 }
 
-// parseUint parses a string ID to uint
 func parseUint(id string) (uint, error) {
 	parsed, err := strconv.ParseUint(id, 10, 32)
 	if err != nil {
@@ -24,7 +22,6 @@ func parseUint(id string) (uint, error) {
 	return uint(parsed), nil
 }
 
-// convertJournalToGraphQL converts a database Journal to GraphQL model
 func convertJournalToGraphQL(j *dbmodel.Journal) *model.Journal {
 	id := strconv.FormatUint(uint64(j.ID), 10)
 

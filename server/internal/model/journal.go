@@ -6,7 +6,6 @@ import (
 	"github.com/pgvector/pgvector-go"
 )
 
-// Journal represents a user's journal entry
 type Journal struct {
 	ID             uint             `gorm:"primaryKey" json:"id"`
 	UserID         uint             `gorm:"index;not null" json:"userId"`
@@ -23,7 +22,6 @@ type Journal struct {
 	Embedding      JournalEmbedding `gorm:"foreignKey:JournalID;constraint:OnDelete:CASCADE" json:"-"`
 }
 
-// JournalImage represents an image attached to a journal
 type JournalImage struct {
 	ID        uint      `gorm:"primaryKey" json:"id"`
 	JournalID uint      `gorm:"index;not null" json:"journalId"`
@@ -32,7 +30,6 @@ type JournalImage struct {
 	CreatedAt time.Time `json:"createdAt"`
 }
 
-// JournalEmbedding stores the vector embedding for a journal entry
 type JournalEmbedding struct {
 	ID        uint            `gorm:"primaryKey" json:"id"`
 	JournalID uint            `gorm:"uniqueIndex;not null" json:"journalId"`

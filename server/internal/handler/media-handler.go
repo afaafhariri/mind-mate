@@ -31,14 +31,12 @@ func UploadMedia(c *gin.Context) {
 	}
 	defer file.Close()
 
-	// Validate file type
 	contentType := header.Header.Get("Content-Type")
 	if !isAllowedMediaType(contentType) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid file type. Allowed: images (jpg, png, gif, webp)"})
 		return
 	}
 
-	// Generate unique filename
 	ext := filepath.Ext(header.Filename)
 	if ext == "" {
 		ext = getExtensionFromContentType(contentType)
@@ -46,7 +44,6 @@ func UploadMedia(c *gin.Context) {
 	filename := fmt.Sprintf("%d-%s%s", time.Now().UnixNano(), uuid.New().String()[:8], ext)
 	filePath := filepath.Join(uploadDir, filename)
 
-	// Create destination file
 	dst, err := os.Create(filePath)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save file"})
@@ -54,14 +51,12 @@ func UploadMedia(c *gin.Context) {
 	}
 	defer dst.Close()
 
-	// Copy file content
 	if _, err := io.Copy(dst, file); err != nil {
 		os.Remove(filePath)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save file"})
 		return
 	}
 
-	// Return URL
 	fileURL := fmt.Sprintf("/uploads/%s", filename)
 	c.JSON(http.StatusOK, gin.H{
 		"url":      fileURL,

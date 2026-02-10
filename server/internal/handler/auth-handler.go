@@ -14,7 +14,6 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// Request/Response types
 type SignupRequest struct {
 	FirstName     string `json:"firstName" binding:"required"`
 	LastName      string `json:"lastName" binding:"required"`
@@ -48,7 +47,6 @@ type ErrorResponse struct {
 	Error string `json:"error"`
 }
 
-// Signup handles user registration
 func Signup(c *gin.Context) {
 	var req SignupRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -56,21 +54,18 @@ func Signup(c *gin.Context) {
 		return
 	}
 
-	// Create user
 	err := repository.CreateUser(req.Email, req.FirstName, req.LastName, req.DateOfBirth, req.City, req.Country, req.Profession, req.MaritalStatus)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, ErrorResponse{Error: err.Error()})
 		return
 	}
 
-	// Generate and save OTP
 	otp := generateOTP()
 	if err := repository.SaveOTP(req.Email, otp); err != nil {
 		c.JSON(http.StatusInternalServerError, ErrorResponse{Error: "Failed to generate OTP"})
 		return
 	}
 
-	// Send OTP email
 	if err := service.SendOTP(req.Email, otp); err != nil {
 		log.Printf("Failed to send OTP: %v", err)
 		c.JSON(http.StatusInternalServerError, ErrorResponse{Error: "Failed to send OTP email"})
@@ -80,7 +75,6 @@ func Signup(c *gin.Context) {
 	c.JSON(http.StatusOK, MessageResponse{Message: "Signup successful. OTP sent to email."})
 }
 
-// Login handles user login
 func Login(c *gin.Context) {
 	var req LoginRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -88,7 +82,6 @@ func Login(c *gin.Context) {
 		return
 	}
 
-	// Check if user exists
 	user, err := repository.GetUserByEmail(req.Email)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, ErrorResponse{Error: "Failed to check user"})
@@ -99,14 +92,12 @@ func Login(c *gin.Context) {
 		return
 	}
 
-	// Generate and save OTP
 	otp := generateOTP()
 	if err := repository.SaveOTP(req.Email, otp); err != nil {
 		c.JSON(http.StatusInternalServerError, ErrorResponse{Error: "Failed to generate OTP"})
 		return
 	}
 
-	// Send OTP email
 	if err := service.SendOTP(req.Email, otp); err != nil {
 		log.Printf("Failed to send OTP: %v", err)
 		c.JSON(http.StatusInternalServerError, ErrorResponse{Error: "Failed to initiate login"})
@@ -116,7 +107,6 @@ func Login(c *gin.Context) {
 	c.JSON(http.StatusOK, MessageResponse{Message: "OTP sent to " + req.Email})
 }
 
-// VerifyOTP handles OTP verification and returns JWT
 func VerifyOTP(c *gin.Context) {
 	var req VerifyOTPRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -124,7 +114,6 @@ func VerifyOTP(c *gin.Context) {
 		return
 	}
 
-	// Verify OTP
 	isValid, err := repository.VerifyOTP(req.Email, req.OTP)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, ErrorResponse{Error: "Failed to verify OTP"})
@@ -135,14 +124,12 @@ func VerifyOTP(c *gin.Context) {
 		return
 	}
 
-	// Get user
 	user, err := repository.GetUserByEmail(req.Email)
 	if err != nil || user == nil {
 		c.JSON(http.StatusNotFound, ErrorResponse{Error: "User not found"})
 		return
 	}
 
-	// Generate JWT token
 	token, err := auth.GenerateToken(req.Email, user.Email)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, ErrorResponse{Error: "Failed to generate token"})
@@ -155,7 +142,6 @@ func VerifyOTP(c *gin.Context) {
 	})
 }
 
-// Helper function to generate 6-digit OTP
 func generateOTP() string {
 	r := rand.New(rand.NewSource(time.Now().UnixNano()))
 	return strconv.Itoa(100000 + r.Intn(900000))

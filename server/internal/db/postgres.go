@@ -26,7 +26,6 @@ func InitPostgres() {
 		log.Fatalf("Unable to connect to database: %v\n", err)
 	}
 
-	// Enable pgvector extension
 	DB.Exec("CREATE EXTENSION IF NOT EXISTS vector")
 
 	log.Println("PostgreSQL connected successfully with GORM")

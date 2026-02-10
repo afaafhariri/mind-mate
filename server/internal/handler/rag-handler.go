@@ -18,7 +18,6 @@ func NewRAGHandler(service *service.RAGService) *RAGHandler {
 	return &RAGHandler{Service: service}
 }
 
-// Chat handles conversation with journal context
 func (h *RAGHandler) Chat(c *gin.Context) {
 	var req struct {
 		Query string `json:"query" binding:"required"`
@@ -35,14 +34,12 @@ func (h *RAGHandler) Chat(c *gin.Context) {
 		return
 	}
 
-	// Generate embedding for query
 	queryEmbedding, err := h.Service.GenerateEmbedding(c.Request.Context(), req.Query)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to process query"})
 		return
 	}
 
-	// Retrieve relevant journals
 	similarJournals, err := repository.SearchSimilarJournals(user.ID, queryEmbedding, 5) // Top 5
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to search journals"})
@@ -54,7 +51,6 @@ func (h *RAGHandler) Chat(c *gin.Context) {
 		contextDocs[i] = "Date: " + j.CreatedAt.Format("2006-01-02") + "\nTopic: " + j.Topic + "\nContent: " + j.Body
 	}
 
-	// Chat with LLM
 	response, err := h.Service.Chat(c.Request.Context(), req.Query, contextDocs)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate response"})
@@ -64,7 +60,6 @@ func (h *RAGHandler) Chat(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"response": response})
 }
 
-// Summary provides weekly/monthly/yearly summaries
 func (h *RAGHandler) Summary(c *gin.Context) {
 	var req struct {
 		Period string `json:"period" binding:"required,oneof=weekly monthly yearly"`
@@ -112,7 +107,6 @@ func (h *RAGHandler) Summary(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"summary": summary})
 }
 
-// PatternRecognition identifies recurring themes
 func (h *RAGHandler) PatternRecognition(c *gin.Context) {
 	email := auth.GetUserEmailFromContext(c.Request.Context())
 	user, err := repository.GetUserByEmail(email)
@@ -121,7 +115,6 @@ func (h *RAGHandler) PatternRecognition(c *gin.Context) {
 		return
 	}
 
-	// Analyze last 30 days by default
 	startDate := time.Now().AddDate(0, 0, -30)
 	journals, err := repository.GetJournalsByDateRange(user.ID, startDate, time.Now())
 	if err != nil {
@@ -174,7 +167,6 @@ func (h *RAGHandler) MoodAnalysis(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"analysis": analysis})
 }
 
-// WritingAssistant helps expand thoughts
 func (h *RAGHandler) WritingAssistant(c *gin.Context) {
 	var req struct {
 		Input string `json:"input" binding:"required"`

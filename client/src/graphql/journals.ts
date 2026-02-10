@@ -1,6 +1,5 @@
 import { gql } from "@apollo/client";
 
-// Queries
 export const GET_JOURNALS = gql`
   query GetJournals($sortBy: SortOrder) {
     getJournals(sortBy: $sortBy) {
@@ -47,7 +46,6 @@ export const GET_JOURNAL = gql`
   }
 `;
 
-// Mutations
 export const CREATE_JOURNAL = gql`
   mutation CreateJournal($input: JournalInput!) {
     createJournal(input: $input) {
@@ -100,7 +98,6 @@ export const DELETE_JOURNAL = gql`
   }
 `;
 
-// Types
 export interface JournalImage {
   id: string;
   url: string;

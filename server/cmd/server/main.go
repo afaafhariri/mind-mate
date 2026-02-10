@@ -29,26 +29,20 @@ func main() {
 		port = "4000"
 	}
 
-	// Initialize PostgreSQL with GORM
 	db.InitPostgres()
 	defer db.ClosePostgres()
 
-	// Auto-migrate models
 	if err := db.AutoMigrate(&model.User{}, &model.OTP{}, &model.Journal{}, &model.JournalImage{}, &model.JournalEmbedding{}); err != nil {
 		log.Fatalf("Failed to auto-migrate: %v", err)
 	}
 	log.Println("Database migrations completed successfully")
 
-	// Initialize RAG Service
 	ragService, err := service.NewRAGService()
 	if err != nil {
 		log.Printf("Warning: Failed to initialize RAG service: %v. AI features will be disabled.", err)
 	}
-
-	// Create Gin router
 	router := gin.Default()
 
-	// Configure CORS
 	router.Use(cors.New(cors.Config{
 		AllowOrigins:     []string{"*"},
 		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
@@ -56,12 +50,9 @@ func main() {
 		AllowCredentials: true,
 	}))
 
-	// Health check
 	router.GET("/system/health", func(c *gin.Context) {
 		c.JSON(200, gin.H{"status": "healthy"})
 	})
-
-	// REST Auth routes
 	authRoutes := router.Group("/api/auth")
 	{
 		authRoutes.POST("/signup", authHandler.Signup)
@@ -69,18 +60,14 @@ func main() {
 		authRoutes.POST("/verify-otp", authHandler.VerifyOTP)
 	}
 
-	// REST Media routes
 	media := router.Group("/api/media")
 	{
 		media.POST("/upload", authHandler.UploadMedia)
 	}
-
-	// REST RAG routes
 	if ragService != nil {
 		ragHandler := authHandler.NewRAGHandler(ragService)
 		ragRoutes := router.Group("/api/rag")
 		{
-			// Middleware to ensure authentication can be added here if needed
 			ragRoutes.POST("/chat", ragHandler.Chat)
 			ragRoutes.POST("/summary", ragHandler.Summary)
 			ragRoutes.POST("/pattern", ragHandler.PatternRecognition)
@@ -89,14 +76,12 @@ func main() {
 		}
 	}
 
-	// Serve uploaded files
 	router.Static("/uploads", "./uploads")
 
-	// GraphQL routes (kept for future use)
-	// Inject RAGService into Resolver
 	resolver := &graph.Resolver{
 		RAGService: ragService,
 	}
+
 	gqlServer := handler.NewDefaultServer(graph.NewExecutableSchema(graph.Config{Resolvers: resolver}))
 
 	router.GET("/", func(c *gin.Context) {
@@ -104,11 +89,9 @@ func main() {
 	})
 
 	router.POST("/graphql", func(c *gin.Context) {
-		// Extract JWT from Authorization header and set user email in context
 		ctx := c.Request.Context()
 		authHeader := c.GetHeader("Authorization")
 		if authHeader != "" {
-			// Remove "Bearer " prefix if present
 			tokenString := authHeader
 			if len(authHeader) > 7 && authHeader[:7] == "Bearer " {
 				tokenString = authHeader[7:]

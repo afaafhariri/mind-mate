@@ -1,6 +1,5 @@
 import { gql } from "@apollo/client";
 
-// Queries
 export const ME = gql`
   query Me {
     me {
@@ -16,7 +15,6 @@ export const ME = gql`
   }
 `;
 
-// Mutations
 export const UPDATE_USER = gql`
   mutation UpdateUser($input: UpdateUserInput!) {
     updateUser(input: $input) {
@@ -48,24 +46,23 @@ export const CONFIRM_EMAIL_CHANGE = gql`
   }
 `;
 
-// Types
 export interface User {
-    email: string;
-    firstName: string;
-    lastName: string;
-    dateOfBirth?: string;
-    city?: string;
-    country?: string;
-    profession?: string;
-    maritalStatus?: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  dateOfBirth?: string;
+  city?: string;
+  country?: string;
+  profession?: string;
+  maritalStatus?: string;
 }
 
 export interface UpdateUserInput {
-    firstName?: string;
-    lastName?: string;
-    dateOfBirth?: string;
-    city?: string;
-    country?: string;
-    profession?: string;
-    maritalStatus?: string;
+  firstName?: string;
+  lastName?: string;
+  dateOfBirth?: string;
+  city?: string;
+  country?: string;
+  profession?: string;
+  maritalStatus?: string;
 }

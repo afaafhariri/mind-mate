@@ -32,19 +32,12 @@ func SendOTP(to string, otp string) error {
 	m.SetBodyString(mail.TypeTextPlain, fmt.Sprintf("Your OTP code is: %s\n", otp))
 	m.SetBodyString(mail.TypeTextHTML, GetOTPTemplate(otp))
 
-	// Setup client
-	// Note: go-mail handles TLS/StartTLS automatically based on port usually,
-	// but might need explicit config depending on the server (e.g. gmail vs others).
-	// Assuming options similar to nodemailer default.
-
-	// Node implementation used secure: false, which implies opportunistic TLS (StartTLS).
-
 	client, err := mail.NewClient(host,
 		mail.WithPort(port),
 		mail.WithSMTPAuth(mail.SMTPAuthPlain),
 		mail.WithUsername(username),
 		mail.WithPassword(password),
-		mail.WithTLSPolicy(mail.TLSOpportunistic), // Like nodemailer secure: false
+		mail.WithTLSPolicy(mail.TLSOpportunistic),
 	)
 
 	if err != nil {

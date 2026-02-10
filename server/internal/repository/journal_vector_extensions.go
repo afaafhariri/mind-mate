@@ -34,14 +34,6 @@ func SearchSimilarJournals(userID uint, embedding []float32, limit int) ([]model
 	var journals []model.Journal
 	vector := pgvector.NewVector(embedding)
 
-	// Subquery to find top N journal IDs by similarity
-	// We join with journals to filter by UserID first if possible, but ordering by distance is tricky with join in standard GORM without raw SQL
-	// Efficient way:
-	// SELECT j.* FROM journals j
-	// JOIN journal_embeddings je ON j.id = je.journal_id
-	// WHERE j.user_id = ?
-	// ORDER BY je.embedding <-> ? LIMIT ?
-
 	err := db.DB.Table("journals").
 		Select("journals.*").
 		Joins("JOIN journal_embeddings ON journals.id = journal_embeddings.journal_id").
