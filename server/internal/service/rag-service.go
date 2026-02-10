@@ -100,19 +100,60 @@ Analysis:`, joinedContent)
 	return llms.GenerateFromSinglePrompt(ctx, s.llm, prompt)
 }
 
+// MoodAnalysisResult represents the structure for mood data
+type MoodAnalysisResult struct {
+	Moods []MoodPoint `json:"moods"`
+}
+
+type MoodPoint struct {
+	Date  string `json:"date"`
+	Mood  string `json:"mood"`
+	Score int    `json:"score"` // 1-10 scale
+}
+
+// InsightsResult represents mental health insights
+type InsightsResult struct {
+	Condition string   `json:"condition"` // Great, Good, Bad, Severe
+	Summary   string   `json:"summary"`
+	Triggers  []string `json:"triggers"`
+}
+
 func (s *RAGService) AnalyzeMood(ctx context.Context, content []string) (string, error) {
 	if len(content) == 0 {
-		return "No entries to analyze.", nil
+		return "{}", nil
 	}
 
 	joinedContent := strings.Join(content, "\n---\n")
-	prompt := fmt.Sprintf(`Analyze the mood and emotional tone of these journal entries. 
-Identify what topics are associated with positive moods and which with negative moods.
+	prompt := fmt.Sprintf(`Analyze the mood of these journal entries.
+Return a JSON object with a list of "moods". Each item should have:
+- "date" (YYYY-MM-DD from the entry if available, or sequential)
+- "mood" (one word)
+- "score" (integer 1-10, where 1 is severe distress and 10 is excellent)
 
 Entries:
 %s
 
-Mood Analysis:`, joinedContent)
+Output JSON only:`, joinedContent)
+
+	return llms.GenerateFromSinglePrompt(ctx, s.llm, prompt)
+}
+
+func (s *RAGService) GetMentalHealthInsights(ctx context.Context, content []string) (string, error) {
+	if len(content) == 0 {
+		return "{}", nil
+	}
+
+	joinedContent := strings.Join(content, "\n---\n")
+	prompt := fmt.Sprintf(`Analyze the overall mental health from these entries.
+Return a JSON object with:
+- "condition": One of "Great", "Good", "Bad", "Severe"
+- "summary": A brief 1-2 sentence overview.
+- "triggers": A list of strings identifying potential negative triggers.
+
+Entries:
+%s
+
+Output JSON only:`, joinedContent)
 
 	return llms.GenerateFromSinglePrompt(ctx, s.llm, prompt)
 }

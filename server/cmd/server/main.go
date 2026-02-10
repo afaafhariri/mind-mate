@@ -67,11 +67,13 @@ func main() {
 	if ragService != nil {
 		ragHandler := authHandler.NewRAGHandler(ragService)
 		ragRoutes := router.Group("/api/rag")
+		ragRoutes.Use(auth.AuthMiddleware())
 		{
 			ragRoutes.POST("/chat", ragHandler.Chat)
 			ragRoutes.POST("/summary", ragHandler.Summary)
 			ragRoutes.POST("/pattern", ragHandler.PatternRecognition)
 			ragRoutes.POST("/mood", ragHandler.MoodAnalysis)
+			ragRoutes.POST("/insights", ragHandler.GetMentalHealthInsights)
 			ragRoutes.POST("/assistant", ragHandler.WritingAssistant)
 		}
 	}

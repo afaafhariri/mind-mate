@@ -25,6 +25,21 @@ export interface AssistantResponse {
     suggestion: string;
 }
 
+export interface MoodPoint {
+    date: string;
+    mood: string;
+    score: number;
+}
+
+export interface MoodAnalysisResponse {
+    analysis: string;
+    moods?: MoodPoint[];
+}
+
+export interface InsightsResponse {
+    insights: string;
+}
+
 export const RagService = {
     chat: async (query: string): Promise<string> => {
         const response = await fetch(`${API_URL}/chat`, {
@@ -58,14 +73,26 @@ export const RagService = {
         return data.analysis;
     },
 
-    analyzeMood: async (): Promise<string> => {
+    analyzeMood: async (period: string = "7d"): Promise<string> => {
         const response = await fetch(`${API_URL}/mood`, {
             method: "POST",
             headers: getHeaders(),
+            body: JSON.stringify({ period }),
         });
         if (!response.ok) throw new Error("Failed to analyze mood");
         const data: AnalysisResponse = await response.json();
         return data.analysis;
+    },
+
+    getMentalHealthInsights: async (): Promise<string> => {
+        const response = await fetch(`${API_URL}/insights`, {
+            method: "POST",
+            headers: getHeaders(),
+            body: JSON.stringify({}),
+        });
+        if (!response.ok) throw new Error("Failed to get insights");
+        const data: InsightsResponse = await response.json();
+        return data.insights;
     },
 
     writingAssistant: async (input: string): Promise<string> => {

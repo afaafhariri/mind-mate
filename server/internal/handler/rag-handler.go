@@ -138,6 +138,12 @@ func (h *RAGHandler) PatternRecognition(c *gin.Context) {
 
 // MoodAnalysis correlates topics with mood
 func (h *RAGHandler) MoodAnalysis(c *gin.Context) {
+	var req struct {
+		Period string `json:"period"` // "7d", "14d", "30d", "3m", "6m", "1y", "3y", "5y"
+	}
+	// Bind JSON if present, otherwise default
+	c.ShouldBindJSON(&req)
+
 	email := auth.GetUserEmailFromContext(c.Request.Context())
 	user, err := repository.GetUserByEmail(email)
 	if err != nil || user == nil {
@@ -145,9 +151,32 @@ func (h *RAGHandler) MoodAnalysis(c *gin.Context) {
 		return
 	}
 
-	// Analyze last 30 days
-	startDate := time.Now().AddDate(0, 0, -30)
-	journals, err := repository.GetJournalsByDateRange(user.ID, startDate, time.Now())
+	now := time.Now()
+	var startDate time.Time
+
+	// Default to 7 days if not specified or invalid
+	switch req.Period {
+	case "7d":
+		startDate = now.AddDate(0, 0, -7)
+	case "14d":
+		startDate = now.AddDate(0, 0, -14)
+	case "30d":
+		startDate = now.AddDate(0, 0, -30)
+	case "3m":
+		startDate = now.AddDate(0, -3, 0)
+	case "6m":
+		startDate = now.AddDate(0, -6, 0)
+	case "1y":
+		startDate = now.AddDate(-1, 0, 0)
+	case "3y":
+		startDate = now.AddDate(-3, 0, 0)
+	case "5y":
+		startDate = now.AddDate(-5, 0, 0)
+	default:
+		startDate = now.AddDate(0, 0, -7)
+	}
+
+	journals, err := repository.GetJournalsByDateRange(user.ID, startDate, now)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch journals"})
 		return
@@ -164,7 +193,42 @@ func (h *RAGHandler) MoodAnalysis(c *gin.Context) {
 		return
 	}
 
+	// Assuming analysis is now a JSON string from the LLM, we might want to unmarshal it or just pass it through.
+	// However, the Service returns a string. If the LLM returns JSON as text, we can send it as a raw string or try to parse it.
+	// For now, let's assume the frontend will parse the JSON string or we can unmarshal here if we want to be strict.
+	// Since we changed service to return "JSON only", it comes as a string.
+
 	c.JSON(http.StatusOK, gin.H{"analysis": analysis})
+}
+
+func (h *RAGHandler) GetMentalHealthInsights(c *gin.Context) {
+	email := auth.GetUserEmailFromContext(c.Request.Context())
+	user, err := repository.GetUserByEmail(email)
+	if err != nil || user == nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		return
+	}
+
+	// Analyze last 30 days for general insights
+	startDate := time.Now().AddDate(0, 0, -30)
+	journals, err := repository.GetJournalsByDateRange(user.ID, startDate, time.Now())
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch journals"})
+		return
+	}
+
+	content := make([]string, len(journals))
+	for i, j := range journals {
+		content[i] = "Date: " + j.CreatedAt.Format("2006-01-02") + "\nTopic: " + j.Topic + "\nContent: " + j.Body
+	}
+
+	insights, err := h.Service.GetMentalHealthInsights(c.Request.Context(), content)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate insights"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"insights": insights})
 }
 
 func (h *RAGHandler) WritingAssistant(c *gin.Context) {
