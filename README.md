@@ -9,58 +9,6 @@ Mind Mate is a personal journaling application designed to help you track your t
 
 This project is a full-stack application leveraging modern web technologies and local LLMs (Large Language Models) to provide a private and intelligent journaling experience. It uses Retrieval-Augmented Generation (RAG) to allow you to chat with your past journal entries and generate meaningful summaries.
 
-## System Architecture
-
-```mermaid
-graph TD
-    subgraph Client ["Frontend (Client)"]
-        UI[React UI]
-        State[State Management]
-        API_Client[API Client]
-        
-        UI --> State
-        State --> API_Client
-    end
-
-    subgraph Server ["Backend (Server)"]
-        Router[Gin Router / Middleware]
-        
-        subgraph Handlers
-            AuthH[Auth Handler]
-            RagH[RAG Handler]
-            JournalH[Journal Handler]
-        end
-        
-        subgraph Services
-            AuthS[Auth Service]
-            RagS[RAG Service]
-        end
-        
-        subgraph Repositories
-            UserR[User Repo]
-            JournalR[Journal Repo]
-            VectorR[Vector Extensions]
-        end
-
-        Router --> AuthH & RagH & JournalH
-        AuthH --> AuthS --> UserR
-        RagH --> RagS
-        JournalH --> JournalR
-        RagS --> VectorR & JournalR
-    end
-
-    subgraph Infrastructure ["Infrastructure & External"]
-        DB[(PostgreSQL + pgvector)]
-        Ollama[Ollama (Local LLM)]
-    end
-
-    API_Client -->|REST / GraphQL| Router
-    
-    UserR & JournalR & VectorR -->|SQL Queries| DB
-    RagS -->|Generate Embeddings / Chat| Ollama
-    
-    linkStyle default stroke-width:2px,fill:none,stroke:#333;
-```
 
 ## Tech Stack
 
