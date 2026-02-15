@@ -147,12 +147,11 @@ export default function Profile() {
     const user = data?.me;
 
     return (
-        <Box sx={{ maxWidth: 800, mx: "auto" }}>
-            <Typography variant="h4" fontWeight={700} gutterBottom>
-                Profile
-            </Typography>
-
-            <Paper elevation={2} sx={{ p: 4, borderRadius: 3 }}>
+        <Box>
+            <Paper elevation={0} sx={{ p: 4, borderRadius: 3, border: '1px solid #e0e0e0' }}>
+                <Typography variant="h4" fontWeight={700} gutterBottom>
+                    Profile
+                </Typography>
                 {/* Profile Header */}
                 <Box sx={{ display: "flex", alignItems: "center", mb: 4 }}>
                     <Avatar

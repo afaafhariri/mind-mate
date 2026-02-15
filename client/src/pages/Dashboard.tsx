@@ -222,12 +222,12 @@ export default function Dashboard() {
 
 
   return (
-    <Box>
+    <Paper elevation={0} sx={{ p: 3, borderRadius: 3, border: '1px solid #e0e0e0' }}>
       {/* Header */}
       <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", mb: 4 }}>
         <Box>
           <Typography variant="h4" fontWeight={700}>
-            Welcome back, {user?.firstName || "Friend"}! 👋
+            Welcome back, {user?.firstName || "Friend"}
           </Typography>
           <Typography color="text.secondary" sx={{ mt: 0.5 }}>
             Here's your mental wellness overview
@@ -239,7 +239,7 @@ export default function Dashboard() {
       {/* Mental Health Insights Widget (Top Priority) */}
       <Grid container spacing={3} sx={{ mb: 4 }}>
         <Grid size={{ xs: 12 }}>
-          <Paper elevation={0} sx={{ p: 3, borderRadius: 3, bgcolor: '#f8f9fa', border: '1px solid #e0e0e0' }}>
+          <Paper elevation={0} sx={{ p: 3, borderRadius: 2, bgcolor: '#f8f9fa' }}>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                 <PsychologyIcon color="primary" />
@@ -290,38 +290,40 @@ export default function Dashboard() {
 
 
       {/* Stats Cards */}
-      <Grid container spacing={3} sx={{ mb: 4 }}>
-        <Grid size={{ xs: 12, sm: 6, md: 4 }}>
-          <Paper elevation={0} sx={{ p: 3, borderRadius: 3, background: "linear-gradient(135deg, #1976d2 0%, #42a5f5 100%)", color: "white" }}>
-            <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
-              <AutoStoriesIcon sx={{ fontSize: 32 }} />
-            </Box>
-            <Typography variant="h3" fontWeight={700}>{userLoading ? <Skeleton width={60} /> : totalJournals}</Typography>
-            <Typography variant="body2" sx={{ opacity: 0.9 }}>Total Journals</Typography>
-          </Paper>
+      <Box sx={{ mb: 4 }}>
+        <Grid container spacing={3}>
+          <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+            <Paper elevation={0} sx={{ p: 3, borderRadius: 3, background: "linear-gradient(135deg, #1976d2 0%, #42a5f5 100%)", color: "white" }}>
+              <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
+                <AutoStoriesIcon sx={{ fontSize: 32 }} />
+              </Box>
+              <Typography variant="h3" fontWeight={700}>{userLoading ? <Skeleton width={60} /> : totalJournals}</Typography>
+              <Typography variant="body2" sx={{ opacity: 0.9 }}>Total Journals</Typography>
+            </Paper>
+          </Grid>
+          <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+            <Paper elevation={0} sx={{ p: 3, borderRadius: 3, background: "linear-gradient(135deg, #0288d1 0%, #4fc3f7 100%)", color: "white" }}>
+              <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
+                <TrendingUpIcon sx={{ fontSize: 32 }} />
+              </Box>
+              <Typography variant="h3" fontWeight={700}>{userLoading ? <Skeleton width={60} /> : thisWeekJournals}</Typography>
+              <Typography variant="body2" sx={{ opacity: 0.9 }}>Journals This Week</Typography>
+            </Paper>
+          </Grid>
+          <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+            <Paper elevation={0} sx={{ p: 3, borderRadius: 3, background: "linear-gradient(135deg, #2196f3 0%, #64b5f6 100%)", color: "white" }}>
+              <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
+                <InsightsIcon sx={{ fontSize: 32 }} />
+              </Box>
+              <Typography variant="h3" fontWeight={700}>{userLoading ? <Skeleton width={60} /> : `${streak} day${streak !== 1 ? "s" : ""}`}</Typography>
+              <Typography variant="body2" sx={{ opacity: 0.9 }}>Current Streak</Typography>
+            </Paper>
+          </Grid>
         </Grid>
-        <Grid size={{ xs: 12, sm: 6, md: 4 }}>
-          <Paper elevation={0} sx={{ p: 3, borderRadius: 3, background: "linear-gradient(135deg, #0288d1 0%, #4fc3f7 100%)", color: "white" }}>
-            <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
-              <TrendingUpIcon sx={{ fontSize: 32 }} />
-            </Box>
-            <Typography variant="h3" fontWeight={700}>{userLoading ? <Skeleton width={60} /> : thisWeekJournals}</Typography>
-            <Typography variant="body2" sx={{ opacity: 0.9 }}>Journals This Week</Typography>
-          </Paper>
-        </Grid>
-        <Grid size={{ xs: 12, sm: 6, md: 4 }}>
-          <Paper elevation={0} sx={{ p: 3, borderRadius: 3, background: "linear-gradient(135deg, #2196f3 0%, #64b5f6 100%)", color: "white" }}>
-            <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
-              <InsightsIcon sx={{ fontSize: 32 }} />
-            </Box>
-            <Typography variant="h3" fontWeight={700}>{userLoading ? <Skeleton width={60} /> : `${streak} day${streak !== 1 ? "s" : ""}`}</Typography>
-            <Typography variant="body2" sx={{ opacity: 0.9 }}>Current Streak</Typography>
-          </Paper>
-        </Grid>
-      </Grid>
+      </Box>
 
       {/* Mood Graph Section */}
-      <Paper elevation={0} sx={{ p: 3, mb: 4, borderRadius: 3, border: '1px solid #e0e0e0' }}>
+      <Box sx={{ mb: 4 }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             <TimelineIcon color="primary" />
@@ -352,10 +354,10 @@ export default function Dashboard() {
             <Typography color="text.secondary" align="center" sx={{ mt: 10 }}>No mood data available for this period.</Typography>
           )}
         </Box>
-      </Paper>
+      </Box>
 
       {/* Summaries & Patterns Section */}
-      <Paper elevation={0} sx={{ p: 3, borderRadius: 3, border: '1px solid #e0e0e0' }}>
+      <Box>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             <AutoStoriesIcon color="primary" />
@@ -387,8 +389,8 @@ export default function Dashboard() {
             )}
           </Grid>
         </Grid>
-      </Paper>
+      </Box>
 
-    </Box>
+    </Paper>
   );
 }

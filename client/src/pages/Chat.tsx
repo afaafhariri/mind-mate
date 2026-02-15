@@ -2,7 +2,6 @@
 import React, { useState } from "react";
 import {
     Box,
-    Container,
     Typography,
     Paper,
     TextField,
@@ -40,17 +39,15 @@ export default function Chat() {
     };
 
     return (
-        <Container maxWidth="lg" sx={{ height: "85vh", display: "flex", flexDirection: "column", py: 2 }}>
-
-            <Box sx={{ mb: 3, display: "flex", alignItems: "center", gap: 2 }}>
-                <AutoAwesomeIcon color="primary" sx={{ fontSize: 32 }} />
-                <Typography variant="h4" fontWeight="bold" color="text.primary">
-                    Chat with Mind Mate
-                </Typography>
-            </Box>
-
-            <Paper sx={{ flexGrow: 1, display: "flex", flexDirection: "column", borderRadius: 3, overflow: "hidden", boxShadow: 3 }}>
+        <Box sx={{ height: "85vh", display: "flex", flexDirection: "column" }}>
+            <Paper elevation={0} sx={{ flexGrow: 1, display: "flex", flexDirection: "column", borderRadius: 3, overflow: "hidden", border: '1px solid #e0e0e0' }}>
                 <Box sx={{ display: "flex", flexDirection: "column", height: "100%", p: 3 }}>
+                    <Box sx={{ mb: 3, display: "flex", alignItems: "center", gap: 2 }}>
+                        <AutoAwesomeIcon color="primary" sx={{ fontSize: 32 }} />
+                        <Typography variant="h4" fontWeight="bold" color="text.primary">
+                            Chat with Mind Mate
+                        </Typography>
+                    </Box>
                     <Box sx={{ flexGrow: 1, overflowY: "auto", mb: 2, display: "flex", flexDirection: "column", gap: 2, px: 1 }}>
                         {chatHistory.length === 0 && (
                             <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', opacity: 0.6 }}>
@@ -101,6 +98,6 @@ export default function Chat() {
                     </form>
                 </Box>
             </Paper>
-        </Container>
+        </Box>
     );
 }
