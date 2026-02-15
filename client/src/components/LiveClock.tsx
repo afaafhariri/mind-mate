@@ -1,7 +1,5 @@
 import { useState, useEffect } from "react";
 import { Box, Typography } from "@mui/material";
-import AccessTimeIcon from "@mui/icons-material/AccessTime";
-import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 
 export default function LiveClock() {
     const [time, setTime] = useState(new Date());
@@ -42,13 +40,11 @@ export default function LiveClock() {
             }}
         >
             <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                <AccessTimeIcon sx={{ fontSize: 20, color: "primary.main" }} />
                 <Typography variant="h5" fontWeight={600} sx={{ fontFamily: "monospace" }}>
                     {formatTime(time)}
                 </Typography>
             </Box>
             <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                <CalendarTodayIcon sx={{ fontSize: 16, color: "text.secondary" }} />
                 <Typography variant="body2" color="text.secondary">
                     {formatDate(time)}
                 </Typography>

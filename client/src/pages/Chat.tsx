@@ -43,9 +43,8 @@ export default function Chat() {
             <Paper elevation={0} sx={{ flexGrow: 1, display: "flex", flexDirection: "column", borderRadius: 3, overflow: "hidden", border: '1px solid #e0e0e0' }}>
                 <Box sx={{ display: "flex", flexDirection: "column", height: "100%", p: 3 }}>
                     <Box sx={{ mb: 3, display: "flex", alignItems: "center", gap: 2 }}>
-                        <AutoAwesomeIcon color="primary" sx={{ fontSize: 32 }} />
                         <Typography variant="h4" fontWeight="bold" color="text.primary">
-                            Chat with Mind Mate
+                            Chat
                         </Typography>
                     </Box>
                     <Box sx={{ flexGrow: 1, overflowY: "auto", mb: 2, display: "flex", flexDirection: "column", gap: 2, px: 1 }}>

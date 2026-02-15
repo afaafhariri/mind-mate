@@ -106,7 +106,7 @@ export default function Journals() {
     const journals = data?.getJournals || [];
 
     return (
-        <Box sx={{ display: "flex", height: "calc(100vh - 48px)", gap: 3 }}>
+        <Paper elevation={0} sx={{ display: "flex", height: "calc(100vh - 48px)", gap: 3, p: 3, borderRadius: 3, border: '1px solid #e0e0e0' }}>
             {/* Left Panel - Journal List */}
             <Paper
                 elevation={0}
@@ -214,14 +214,14 @@ export default function Journals() {
             </Paper>
 
             {/* Right Panel - Journal Detail */}
-            <Paper
-                elevation={2}
+            <Box
                 sx={{
                     flex: 1,
-                    borderRadius: 3,
+                    borderRadius: 2,
                     overflow: "hidden",
                     display: "flex",
                     flexDirection: "column",
+                    bgcolor: '#f8f9fa',
                 }}
             >
                 {selectedJournal ? (
@@ -249,7 +249,7 @@ export default function Journals() {
                         </Typography>
                     </Box>
                 )}
-            </Paper>
+            </Box>
 
             {/* Floating Action Button (Mobile) */}
             <Fab
@@ -298,6 +298,6 @@ export default function Journals() {
                     </Button>
                 </DialogActions>
             </Dialog>
-        </Box>
+        </Paper>
     );
 }

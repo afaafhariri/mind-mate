@@ -1,18 +1,6 @@
 import { useState, useEffect } from "react";
 import { useQuery } from "@apollo/client/react";
-import {
-  Box,
-  Typography,
-  Paper,
-  Grid,
-  Skeleton,
-  FormControl,
-  Select,
-  MenuItem,
-  Chip,
-  Button,
-  CircularProgress
-} from "@mui/material";
+import { Box, Typography, Paper, Grid, Skeleton, FormControl, Select, MenuItem, Chip, Button, CircularProgress } from "@mui/material";
 import AutoStoriesIcon from "@mui/icons-material/AutoStories";
 import TrendingUpIcon from "@mui/icons-material/TrendingUp";
 import InsightsIcon from "@mui/icons-material/Insights";
@@ -23,18 +11,7 @@ import LiveClock from "../components/LiveClock";
 import { ME, type User } from "../graphql/user";
 import { GET_JOURNALS, type Journal } from "../graphql/journals";
 import { RagService, type MoodPoint } from "../services/ragService";
-
-// Chart.js imports
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Title,
-  Tooltip,
-  Legend,
-} from "chart.js";
+import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend } from "chart.js";
 import { Line } from "react-chartjs-2";
 
 ChartJS.register(
@@ -49,26 +26,23 @@ ChartJS.register(
 
 export default function Dashboard() {
   const { data: userData, loading: userLoading } = useQuery<{ me: User }>(ME);
-  const { data: journalData } = useQuery<{
-    getJournals: Journal[];
-  }>(GET_JOURNALS);
+  const { data: journalData } = useQuery<{ getJournals: Journal[]; }>(GET_JOURNALS);
 
   const [moodPeriod, setMoodPeriod] = useState("7d");
   const [moodData, setMoodData] = useState<MoodPoint[]>([]);
   const [loadingMood, setLoadingMood] = useState(false);
 
-  const [insights, setInsights] = useState<any>(null); // Structure: { condition, summary, triggers }
+  const [insights, setInsights] = useState<any>(null);
   const [loadingInsights, setLoadingInsights] = useState(false);
 
   const [summaryPeriod, setSummaryPeriod] = useState<"weekly" | "monthly" | "yearly">("weekly");
   const [summaryText, setSummaryText] = useState("");
-  const [patternText, setPatternText] = useState(""); // Kept separate or merged as requested? User said "put pattern functions in summaries"
+  const [patternText, setPatternText] = useState("");
   const [loadingSummary, setLoadingSummary] = useState(false);
 
   const user = userData?.me;
   const journals = journalData?.getJournals || [];
 
-  // Derived Stats
   const totalJournals = journals.length;
   const thisWeekJournals = journals.filter((j) => {
     const journalDate = new Date(j.createdAt);
@@ -88,24 +62,18 @@ export default function Dashboard() {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    // Check if posted today
     const postedToday = sortedDates.length > 0 && sortedDates[0] === today.toDateString();
 
     // Logic: if posted today, streak starts at 1. If not, check yesterday.
-    // Simplifying for this snippet:
     for (let i = 0; i < sortedDates.length; i++) {
       const expectedDate = new Date(today);
       expectedDate.setDate(expectedDate.getDate() - i);
-      // Allow for skipping today if not yet posted
-      // Robust streak logic is complex, using simplified version
       if (sortedDates.includes(expectedDate.toDateString())) {
         streak++;
       } else if (i === 0 && !postedToday) {
-        // check yesterday
         const yesterday = new Date(today);
         yesterday.setDate(yesterday.getDate() - 1);
         if (sortedDates.includes(yesterday.toDateString())) {
-          // Should adjust loop index, but keeping simple
         } else {
           break;
         }
@@ -118,18 +86,11 @@ export default function Dashboard() {
 
   const streak = calculateStreak();
 
-  // --- API Calls ---
-
   const fetchMoodData = async () => {
     setLoadingMood(true);
     try {
-      // Backend now returns JSON string which we parse
       const resultString = await RagService.analyzeMood(moodPeriod);
-      // The service returns a string (JSON). We need to parse it.
-      // Ideally the service response type would be handled better, but let's parse here.
-      // resultString is expected to be `{"moods": [...]}`
 
-      // Sanitizing code block if LLM wraps in ```json ... ```
       let cleanJson = resultString.replace(/```json/g, "").replace(/```/g, "").trim();
 
       const parsed = JSON.parse(cleanJson);
@@ -137,7 +98,6 @@ export default function Dashboard() {
       if (parsed.moods) {
         setMoodData(parsed.moods);
       }
-      // Set textual analysis if included, or just keep data
     } catch (error) {
       console.error("Failed to fetch mood data", error);
     } finally {
@@ -151,7 +111,7 @@ export default function Dashboard() {
       const resultString = await RagService.getMentalHealthInsights();
       let cleanJson = resultString.replace(/```json/g, "").replace(/```/g, "").trim();
       const parsed = JSON.parse(cleanJson);
-      setInsights(parsed); // { condition, summary, triggers }
+      setInsights(parsed);
     } catch (error) {
       console.error("Failed to fetch insights", error);
     } finally {
@@ -162,10 +122,9 @@ export default function Dashboard() {
   const fetchSummaryAndPatterns = async () => {
     setLoadingSummary(true);
     try {
-      // Parallel fetch
       const [summary, patterns] = await Promise.all([
         RagService.getSummary(summaryPeriod),
-        RagService.analyzePatterns() // patterns usually on last 30 days
+        RagService.analyzePatterns()
       ]);
       setSummaryText(summary);
       setPatternText(patterns);
@@ -176,18 +135,14 @@ export default function Dashboard() {
     }
   }
 
-  // Initial Load (optional, or trigger on button)
-  // User said "API must hit while we land on dashboard... and there should be a button to re hit"
   useEffect(() => {
     if (user) {
       fetchMoodData();
       fetchInsights();
-      // fetchSummaryAndPatterns(); // Maybe load this on demand or initial? Let's load initial.
       fetchSummaryAndPatterns();
     }
   }, [user]);
 
-  // Re-fetch mood when period changes
   useEffect(() => {
     if (user) {
       fetchMoodData();
@@ -227,7 +182,7 @@ export default function Dashboard() {
       <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", mb: 4 }}>
         <Box>
           <Typography variant="h4" fontWeight={700}>
-            Welcome back, {user?.firstName || "Friend"}
+            Hello, {user?.firstName || "Friend"}
           </Typography>
           <Typography color="text.secondary" sx={{ mt: 0.5 }}>
             Here's your mental wellness overview
@@ -236,7 +191,6 @@ export default function Dashboard() {
         <LiveClock />
       </Box>
 
-      {/* Mental Health Insights Widget (Top Priority) */}
       <Grid container spacing={3} sx={{ mb: 4 }}>
         <Grid size={{ xs: 12 }}>
           <Paper elevation={0} sx={{ p: 3, borderRadius: 2, bgcolor: '#f8f9fa' }}>
@@ -255,7 +209,7 @@ export default function Dashboard() {
             ) : insights ? (
               <Grid container spacing={3}>
                 <Grid size={{ xs: 12, md: 4 }}>
-                  <Paper elevation={0} sx={{ p: 2, bgcolor: 'white', borderRadius: 2, textAlign: 'center', height: '100%' }}>
+                  <Paper elevation={0} sx={{ p: 2, borderRadius: 2, textAlign: 'center', height: '100%' }}>
                     <Typography variant="subtitle2" color="text.secondary">Overall Condition</Typography>
                     <Typography variant="h3" fontWeight={800}
                       color={insights.condition === 'Great' ? 'success.main' :
