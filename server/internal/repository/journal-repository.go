@@ -5,11 +5,12 @@ import (
 
 	"mind-mate-server/internal/db"
 	"mind-mate-server/internal/model"
+	"mind-mate-server/internal/service"
 
 	"gorm.io/gorm"
 )
 
-func CreateJournal(userID uint, topic, body string, fontHeading, fontSubheading, fontBody, fontMono *string, imageUrls []string) (*model.Journal, error) {
+func CreateJournal(userID uint, topic, body string, fontHeading, fontSubheading, fontBody, fontMono *string, imageUrls []string, metrics *service.JournalMetrics) (*model.Journal, error) {
 	journal := model.Journal{
 		UserID:         userID,
 		Topic:          topic,
@@ -18,6 +19,16 @@ func CreateJournal(userID uint, topic, body string, fontHeading, fontSubheading,
 		FontSubheading: fontSubheading,
 		FontBody:       fontBody,
 		FontMono:       fontMono,
+	}
+
+	if metrics != nil {
+		journal.MoodScore = metrics.MoodScore
+		journal.AnxietyLevel = metrics.AnxietyLevel
+		journal.SleepQuality = metrics.SleepQuality
+		journal.Condition = metrics.Condition
+		journal.PrimaryEmotion = metrics.PrimaryEmotion
+		journal.Triggers = metrics.Triggers
+		journal.SummaryText = metrics.SummaryText
 	}
 
 	tx := db.DB.Begin()

@@ -40,7 +40,7 @@ func (h *RAGHandler) Chat(c *gin.Context) {
 		return
 	}
 
-	similarJournals, err := repository.SearchSimilarJournals(user.ID, queryEmbedding, 5) // Top 5
+	similarJournals, err := repository.SearchSimilarJournals(user.ID, queryEmbedding, 5)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to search journals"})
 		return
@@ -93,18 +93,23 @@ func (h *RAGHandler) Summary(c *gin.Context) {
 		return
 	}
 
-	content := make([]string, len(journals))
-	for i, j := range journals {
-		content[i] = "Date: " + j.CreatedAt.Format("2006-01-02") + "\nTopic: " + j.Topic + "\nContent: " + j.Body
-	}
-
-	summary, err := h.Service.SummarizeJournals(c.Request.Context(), content, req.Period)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate summary"})
+	if len(journals) == 0 {
+		c.JSON(http.StatusOK, gin.H{"summary": "No journal entries found for this period."})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"summary": summary})
+	var summaryBuilder string
+	for _, j := range journals {
+		if j.SummaryText != "" {
+			summaryBuilder += j.SummaryText + " "
+		}
+	}
+
+	if summaryBuilder == "" {
+		summaryBuilder = "You have journaled, but no detailed summaries have been extracted. Keep writing to build a stronger profile."
+	}
+
+	c.JSON(http.StatusOK, gin.H{"summary": summaryBuilder})
 }
 
 func (h *RAGHandler) PatternRecognition(c *gin.Context) {
@@ -122,26 +127,44 @@ func (h *RAGHandler) PatternRecognition(c *gin.Context) {
 		return
 	}
 
-	content := make([]string, len(journals))
-	for i, j := range journals {
-		content[i] = "Date: " + j.CreatedAt.Format("2006-01-02") + "\nTopic: " + j.Topic + "\nContent: " + j.Body
+	if len(journals) == 0 {
+		c.JSON(http.StatusOK, gin.H{"analysis": "Not enough data to analyze patterns."})
+		return
 	}
 
-	analysis, err := h.Service.AnalyzePatterns(c.Request.Context(), content)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to analyze patterns"})
-		return
+	var avgAnxiety, avgSleep, count int
+	triggerMap := make(map[string]int)
+
+	for _, j := range journals {
+		avgAnxiety += j.AnxietyLevel
+		avgSleep += j.SleepQuality
+		count++
+		for _, t := range j.Triggers {
+			triggerMap[t]++
+		}
+	}
+
+	if count > 0 {
+		avgAnxiety /= count
+		avgSleep /= count
+	}
+
+	analysis := "Based on your recent data, your average anxiety level is " + string(rune('0'+avgAnxiety)) + "/10 and average sleep quality is " + string(rune('0'+avgSleep)) + "/10. "
+
+	if len(triggerMap) > 0 {
+		analysis += "Common triggers include: "
+		for t := range triggerMap {
+			analysis += t + ", "
+		}
 	}
 
 	c.JSON(http.StatusOK, gin.H{"analysis": analysis})
 }
 
-// MoodAnalysis correlates topics with mood
 func (h *RAGHandler) MoodAnalysis(c *gin.Context) {
 	var req struct {
-		Period string `json:"period"` // "7d", "14d", "30d", "3m", "6m", "1y", "3y", "5y"
+		Period string `json:"period"`
 	}
-	// Bind JSON if present, otherwise default
 	c.ShouldBindJSON(&req)
 
 	email := auth.GetUserEmailFromContext(c.Request.Context())
@@ -154,7 +177,6 @@ func (h *RAGHandler) MoodAnalysis(c *gin.Context) {
 	now := time.Now()
 	var startDate time.Time
 
-	// Default to 7 days if not specified or invalid
 	switch req.Period {
 	case "7d":
 		startDate = now.AddDate(0, 0, -7)
@@ -182,23 +204,34 @@ func (h *RAGHandler) MoodAnalysis(c *gin.Context) {
 		return
 	}
 
-	content := make([]string, len(journals))
-	for i, j := range journals {
-		content[i] = "Date: " + j.CreatedAt.Format("2006-01-02") + "\nTopic: " + j.Topic + "\nContent: " + j.Body
+	type MoodPoint struct {
+		Date         string `json:"date"`
+		Mood         string `json:"mood"`
+		Score        int    `json:"score"`
+		AnxietyLevel int    `json:"anxiety_level"`
+		SleepQuality int    `json:"sleep_quality"`
 	}
 
-	analysis, err := h.Service.AnalyzeMood(c.Request.Context(), content)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to analyze mood"})
-		return
+	moods := make([]MoodPoint, 0, len(journals))
+	for _, j := range journals {
+		mood := j.PrimaryEmotion
+		if mood == "" {
+			mood = "neutral"
+		}
+		moods = append(moods, MoodPoint{
+			Date:         j.CreatedAt.Format("2006-01-02"),
+			Mood:         mood,
+			Score:        j.MoodScore,
+			AnxietyLevel: j.AnxietyLevel,
+			SleepQuality: j.SleepQuality,
+		})
 	}
 
-	// Assuming analysis is now a JSON string from the LLM, we might want to unmarshal it or just pass it through.
-	// However, the Service returns a string. If the LLM returns JSON as text, we can send it as a raw string or try to parse it.
-	// For now, let's assume the frontend will parse the JSON string or we can unmarshal here if we want to be strict.
-	// Since we changed service to return "JSON only", it comes as a string.
+	output := map[string]interface{}{
+		"moods": moods,
+	}
 
-	c.JSON(http.StatusOK, gin.H{"analysis": analysis})
+	c.JSON(http.StatusOK, output)
 }
 
 func (h *RAGHandler) GetMentalHealthInsights(c *gin.Context) {
@@ -209,7 +242,6 @@ func (h *RAGHandler) GetMentalHealthInsights(c *gin.Context) {
 		return
 	}
 
-	// Analyze last 30 days for general insights
 	startDate := time.Now().AddDate(0, 0, -30)
 	journals, err := repository.GetJournalsByDateRange(user.ID, startDate, time.Now())
 	if err != nil {
@@ -217,18 +249,58 @@ func (h *RAGHandler) GetMentalHealthInsights(c *gin.Context) {
 		return
 	}
 
-	content := make([]string, len(journals))
-	for i, j := range journals {
-		content[i] = "Date: " + j.CreatedAt.Format("2006-01-02") + "\nTopic: " + j.Topic + "\nContent: " + j.Body
-	}
-
-	insights, err := h.Service.GetMentalHealthInsights(c.Request.Context(), content)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate insights"})
+	if len(journals) == 0 {
+		c.JSON(http.StatusOK, gin.H{
+			"condition": "Unknown",
+			"summary":   "Not enough data.",
+			"triggers":  []string{},
+		})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"insights": insights})
+	var greatCount, goodCount, badCount, severeCount int
+	triggerSet := make(map[string]bool)
+
+	for _, j := range journals {
+		switch j.Condition {
+		case "Great":
+			greatCount++
+		case "Good":
+			goodCount++
+		case "Bad":
+			badCount++
+		case "Severe":
+			severeCount++
+		}
+		for _, t := range j.Triggers {
+			triggerSet[t] = true
+		}
+	}
+
+	dominantCondition := "Good"
+	maxCond := goodCount
+	if greatCount > maxCond {
+		dominantCondition = "Great"
+		maxCond = greatCount
+	}
+	if badCount > maxCond {
+		dominantCondition = "Bad"
+		maxCond = badCount
+	}
+	if severeCount > maxCond {
+		dominantCondition = "Severe"
+	}
+
+	triggers := make([]string, 0, len(triggerSet))
+	for t := range triggerSet {
+		triggers = append(triggers, t)
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"condition": dominantCondition,
+		"summary":   "Your general condition has been mostly " + dominantCondition + " over the last 30 days.",
+		"triggers":  triggers,
+	})
 }
 
 func (h *RAGHandler) WritingAssistant(c *gin.Context) {

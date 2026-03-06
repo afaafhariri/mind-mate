@@ -178,6 +178,17 @@ func (r *mutationResolver) CreateJournal(ctx context.Context, input model.Journa
 		imageUrls = input.ImageUrls
 	}
 
+	var metrics *service.JournalMetrics
+	if r.RAGService != nil {
+		textForMetrics := fmt.Sprintf("Topic: %s\nBody: %s", input.Topic, input.Body)
+		extMetrics, err := r.RAGService.ExtractJournalMetrics(ctx, textForMetrics)
+		if err == nil {
+			metrics = extMetrics
+		} else {
+			log.Printf("Failed to extract journal metrics: %v", err)
+		}
+	}
+
 	journal, err := repository.CreateJournal(
 		userID,
 		input.Topic,
@@ -187,6 +198,7 @@ func (r *mutationResolver) CreateJournal(ctx context.Context, input model.Journa
 		input.FontBody,
 		input.FontMono,
 		imageUrls,
+		metrics,
 	)
 	if err != nil {
 		return nil, err

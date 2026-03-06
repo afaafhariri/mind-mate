@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"strings"
 
@@ -29,8 +30,6 @@ func NewRAGService() (*RAGService, error) {
 	}, nil
 }
 func (s *RAGService) GenerateEmbedding(ctx context.Context, text string) ([]float32, error) {
-	// We need a separate client or configuration for embedding if the main one is for chat
-	// For simplicity with langchaingo, we can try to use the same client or create a new one for embedding
 	embedLLM, err := ollama.New(ollama.WithModel("nomic-embed-text"))
 	if err != nil {
 		return nil, err
@@ -53,6 +52,7 @@ func (s *RAGService) Chat(ctx context.Context, query string, contextDocs []strin
 	prompt := fmt.Sprintf(`You are a helpful AI assistant for a personal journal.
 Use the following journal entries as context to answer the user's question.
 If the answer is not in the context, say you don't know based on the journal, but you can offer general advice if applicable.
+Never support or encourage suicidal thoughts; instead gently encourage seeking professional help.
 
 Context:
 %s
@@ -100,7 +100,6 @@ Analysis:`, joinedContent)
 	return llms.GenerateFromSinglePrompt(ctx, s.llm, prompt)
 }
 
-// MoodAnalysisResult represents the structure for mood data
 type MoodAnalysisResult struct {
 	Moods []MoodPoint `json:"moods"`
 }
@@ -108,12 +107,11 @@ type MoodAnalysisResult struct {
 type MoodPoint struct {
 	Date  string `json:"date"`
 	Mood  string `json:"mood"`
-	Score int    `json:"score"` // 1-10 scale
+	Score int    `json:"score"`
 }
 
-// InsightsResult represents mental health insights
 type InsightsResult struct {
-	Condition string   `json:"condition"` // Great, Good, Bad, Severe
+	Condition string   `json:"condition"`
 	Summary   string   `json:"summary"`
 	Triggers  []string `json:"triggers"`
 }
@@ -167,4 +165,45 @@ User Input: "%s"
 Suggestion:`, input)
 
 	return llms.GenerateFromSinglePrompt(ctx, s.llm, prompt)
+}
+
+type JournalMetrics struct {
+	MoodScore      int      `json:"mood_score"`
+	AnxietyLevel   int      `json:"anxiety_level"`
+	SleepQuality   int      `json:"sleep_quality"`
+	Condition      string   `json:"condition"`
+	PrimaryEmotion string   `json:"primary_emotion"`
+	Triggers       []string `json:"triggers"`
+	SummaryText    string   `json:"summary_text"`
+}
+
+func (s *RAGService) ExtractJournalMetrics(ctx context.Context, text string) (*JournalMetrics, error) {
+	prompt := fmt.Sprintf(`Extract the following metrics from the journal entry below. Do not include any explanations, output strict JSON only.
+Fields required:
+- "mood_score": integer 1-10
+- "anxiety_level": integer 1-10
+- "sleep_quality": integer 1-10
+- "condition": string (only "Great", "Good", "Bad", or "Severe")
+- "primary_emotion": string (e.g. "happy", "anxious", "sad")
+- "triggers": array of strings (e.g. ["work", "argument"])
+- "summary_text": string (brief 1-2 sentence summary of the entry)
+
+Journal Entry:
+%s
+
+Output JSON only:`, text)
+
+	completion, err := llms.GenerateFromSinglePrompt(ctx, s.llm, prompt)
+	if err != nil {
+		return nil, err
+	}
+
+	cleanJson := strings.TrimSpace(strings.ReplaceAll(strings.ReplaceAll(completion, "```json", ""), "```", ""))
+
+	var metrics JournalMetrics
+	if err := json.Unmarshal([]byte(cleanJson), &metrics); err != nil {
+		return nil, err
+	}
+
+	return &metrics, nil
 }

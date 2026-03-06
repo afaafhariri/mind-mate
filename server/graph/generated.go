@@ -60,11 +60,14 @@ type ComplexityRoot struct {
 	}
 
 	Journal struct {
+		AnxietyLevel func(childComplexity int) int
 		Body         func(childComplexity int) int
 		CreatedAt    func(childComplexity int) int
 		FontSettings func(childComplexity int) int
 		ID           func(childComplexity int) int
 		Images       func(childComplexity int) int
+		MoodScore    func(childComplexity int) int
+		SleepQuality func(childComplexity int) int
 		Topic        func(childComplexity int) int
 		UpdatedAt    func(childComplexity int) int
 	}
@@ -181,6 +184,12 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 
 		return e.complexity.FontSettings.Subheading(childComplexity), true
 
+	case "Journal.anxietyLevel":
+		if e.complexity.Journal.AnxietyLevel == nil {
+			break
+		}
+
+		return e.complexity.Journal.AnxietyLevel(childComplexity), true
 	case "Journal.body":
 		if e.complexity.Journal.Body == nil {
 			break
@@ -211,6 +220,18 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.Journal.Images(childComplexity), true
+	case "Journal.moodScore":
+		if e.complexity.Journal.MoodScore == nil {
+			break
+		}
+
+		return e.complexity.Journal.MoodScore(childComplexity), true
+	case "Journal.sleepQuality":
+		if e.complexity.Journal.SleepQuality == nil {
+			break
+		}
+
+		return e.complexity.Journal.SleepQuality(childComplexity), true
 	case "Journal.topic":
 		if e.complexity.Journal.Topic == nil {
 			break
@@ -1082,6 +1103,93 @@ func (ec *executionContext) fieldContext_Journal_body(_ context.Context, field g
 	return fc, nil
 }
 
+func (ec *executionContext) _Journal_moodScore(ctx context.Context, field graphql.CollectedField, obj *model.Journal) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Journal_moodScore,
+		func(ctx context.Context) (any, error) {
+			return obj.MoodScore, nil
+		},
+		nil,
+		ec.marshalOInt2ᚖint32,
+		true,
+		false,
+	)
+}
+
+func (ec *executionContext) fieldContext_Journal_moodScore(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Journal",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Journal_anxietyLevel(ctx context.Context, field graphql.CollectedField, obj *model.Journal) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Journal_anxietyLevel,
+		func(ctx context.Context) (any, error) {
+			return obj.AnxietyLevel, nil
+		},
+		nil,
+		ec.marshalOInt2ᚖint32,
+		true,
+		false,
+	)
+}
+
+func (ec *executionContext) fieldContext_Journal_anxietyLevel(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Journal",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Journal_sleepQuality(ctx context.Context, field graphql.CollectedField, obj *model.Journal) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Journal_sleepQuality,
+		func(ctx context.Context) (any, error) {
+			return obj.SleepQuality, nil
+		},
+		nil,
+		ec.marshalOInt2ᚖint32,
+		true,
+		false,
+	)
+}
+
+func (ec *executionContext) fieldContext_Journal_sleepQuality(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Journal",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Journal_fontSettings(ctx context.Context, field graphql.CollectedField, obj *model.Journal) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
@@ -1622,6 +1730,12 @@ func (ec *executionContext) fieldContext_Mutation_createJournal(ctx context.Cont
 				return ec.fieldContext_Journal_topic(ctx, field)
 			case "body":
 				return ec.fieldContext_Journal_body(ctx, field)
+			case "moodScore":
+				return ec.fieldContext_Journal_moodScore(ctx, field)
+			case "anxietyLevel":
+				return ec.fieldContext_Journal_anxietyLevel(ctx, field)
+			case "sleepQuality":
+				return ec.fieldContext_Journal_sleepQuality(ctx, field)
 			case "fontSettings":
 				return ec.fieldContext_Journal_fontSettings(ctx, field)
 			case "images":
@@ -1679,6 +1793,12 @@ func (ec *executionContext) fieldContext_Mutation_updateJournal(ctx context.Cont
 				return ec.fieldContext_Journal_topic(ctx, field)
 			case "body":
 				return ec.fieldContext_Journal_body(ctx, field)
+			case "moodScore":
+				return ec.fieldContext_Journal_moodScore(ctx, field)
+			case "anxietyLevel":
+				return ec.fieldContext_Journal_anxietyLevel(ctx, field)
+			case "sleepQuality":
+				return ec.fieldContext_Journal_sleepQuality(ctx, field)
 			case "fontSettings":
 				return ec.fieldContext_Journal_fontSettings(ctx, field)
 			case "images":
@@ -1836,6 +1956,12 @@ func (ec *executionContext) fieldContext_Query_getJournals(ctx context.Context, 
 				return ec.fieldContext_Journal_topic(ctx, field)
 			case "body":
 				return ec.fieldContext_Journal_body(ctx, field)
+			case "moodScore":
+				return ec.fieldContext_Journal_moodScore(ctx, field)
+			case "anxietyLevel":
+				return ec.fieldContext_Journal_anxietyLevel(ctx, field)
+			case "sleepQuality":
+				return ec.fieldContext_Journal_sleepQuality(ctx, field)
 			case "fontSettings":
 				return ec.fieldContext_Journal_fontSettings(ctx, field)
 			case "images":
@@ -1893,6 +2019,12 @@ func (ec *executionContext) fieldContext_Query_getJournal(ctx context.Context, f
 				return ec.fieldContext_Journal_topic(ctx, field)
 			case "body":
 				return ec.fieldContext_Journal_body(ctx, field)
+			case "moodScore":
+				return ec.fieldContext_Journal_moodScore(ctx, field)
+			case "anxietyLevel":
+				return ec.fieldContext_Journal_anxietyLevel(ctx, field)
+			case "sleepQuality":
+				return ec.fieldContext_Journal_sleepQuality(ctx, field)
 			case "fontSettings":
 				return ec.fieldContext_Journal_fontSettings(ctx, field)
 			case "images":
@@ -4004,6 +4136,12 @@ func (ec *executionContext) _Journal(ctx context.Context, sel ast.SelectionSet, 
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
+		case "moodScore":
+			out.Values[i] = ec._Journal_moodScore(ctx, field, obj)
+		case "anxietyLevel":
+			out.Values[i] = ec._Journal_anxietyLevel(ctx, field, obj)
+		case "sleepQuality":
+			out.Values[i] = ec._Journal_sleepQuality(ctx, field, obj)
 		case "fontSettings":
 			out.Values[i] = ec._Journal_fontSettings(ctx, field, obj)
 		case "images":
@@ -5207,6 +5345,24 @@ func (ec *executionContext) marshalOFontSettings2ᚖmindᚑmateᚑserverᚋgraph
 		return graphql.Null
 	}
 	return ec._FontSettings(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalOInt2ᚖint32(ctx context.Context, v any) (*int32, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := graphql.UnmarshalInt32(v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOInt2ᚖint32(ctx context.Context, sel ast.SelectionSet, v *int32) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	_ = sel
+	_ = ctx
+	res := graphql.MarshalInt32(*v)
+	return res
 }
 
 func (ec *executionContext) marshalOJournal2ᚖmindᚑmateᚑserverᚋgraphᚋmodelᚐJournal(ctx context.Context, sel ast.SelectionSet, v *model.Journal) graphql.Marshaler {

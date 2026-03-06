@@ -11,6 +11,13 @@ type Journal struct {
 	UserID         uint             `gorm:"index;not null" json:"userId"`
 	Topic          string           `gorm:"not null;size:500" json:"topic"`
 	Body           string           `gorm:"type:text;not null" json:"body"`
+	MoodScore      int              `gorm:"default:0" json:"moodScore"`
+	AnxietyLevel   int              `gorm:"default:0" json:"anxietyLevel"`
+	SleepQuality   int              `gorm:"default:0" json:"sleepQuality"`
+	Condition      string           `gorm:"size:50" json:"condition"`
+	PrimaryEmotion string           `gorm:"size:100" json:"primaryEmotion"`
+	Triggers       []string         `gorm:"serializer:json" json:"triggers"`
+	SummaryText    string           `gorm:"type:text" json:"summaryText"`
 	FontHeading    *string          `gorm:"size:100" json:"fontHeading,omitempty"`
 	FontSubheading *string          `gorm:"size:100" json:"fontSubheading,omitempty"`
 	FontBody       *string          `gorm:"size:100" json:"fontBody,omitempty"`

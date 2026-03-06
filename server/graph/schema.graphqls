@@ -13,6 +13,9 @@ type Journal {
   id: ID!
   topic: String!
   body: String!
+  moodScore: Int
+  anxietyLevel: Int
+  sleepQuality: Int
   fontSettings: FontSettings
   images: [JournalImage!]!
   createdAt: String!

@@ -25,6 +25,9 @@ type Journal struct {
 	ID           string          `json:"id"`
 	Topic        string          `json:"topic"`
 	Body         string          `json:"body"`
+	MoodScore    *int32          `json:"moodScore,omitempty"`
+	AnxietyLevel *int32          `json:"anxietyLevel,omitempty"`
+	SleepQuality *int32          `json:"sleepQuality,omitempty"`
 	FontSettings *FontSettings   `json:"fontSettings,omitempty"`
 	Images       []*JournalImage `json:"images"`
 	CreatedAt    string          `json:"createdAt"`

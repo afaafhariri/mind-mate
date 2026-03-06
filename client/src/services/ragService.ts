@@ -1,4 +1,3 @@
-
 const API_URL = "http://localhost:4000/api/rag";
 
 const getHeaders = () => {
@@ -29,15 +28,18 @@ export interface MoodPoint {
     date: string;
     mood: string;
     score: number;
+    anxiety_level: number;
+    sleep_quality: number;
 }
 
 export interface MoodAnalysisResponse {
-    analysis: string;
-    moods?: MoodPoint[];
+    moods: MoodPoint[];
 }
 
 export interface InsightsResponse {
-    insights: string;
+    condition: string;
+    summary: string;
+    triggers: string[];
 }
 
 export const RagService = {
@@ -73,18 +75,18 @@ export const RagService = {
         return data.analysis;
     },
 
-    analyzeMood: async (period: string = "7d"): Promise<string> => {
+    analyzeMood: async (period: string = "7d"): Promise<MoodAnalysisResponse> => {
         const response = await fetch(`${API_URL}/mood`, {
             method: "POST",
             headers: getHeaders(),
             body: JSON.stringify({ period }),
         });
         if (!response.ok) throw new Error("Failed to analyze mood");
-        const data: AnalysisResponse = await response.json();
-        return data.analysis;
+        const data: MoodAnalysisResponse = await response.json();
+        return data;
     },
 
-    getMentalHealthInsights: async (): Promise<string> => {
+    getMentalHealthInsights: async (): Promise<InsightsResponse> => {
         const response = await fetch(`${API_URL}/insights`, {
             method: "POST",
             headers: getHeaders(),
@@ -92,7 +94,7 @@ export const RagService = {
         });
         if (!response.ok) throw new Error("Failed to get insights");
         const data: InsightsResponse = await response.json();
-        return data.insights;
+        return data;
     },
 
     writingAssistant: async (input: string): Promise<string> => {
