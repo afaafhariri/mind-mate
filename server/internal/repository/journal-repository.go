@@ -104,7 +104,7 @@ func GetJournalByID(id uint) (*model.Journal, error) {
 	return &journal, nil
 }
 
-func UpdateJournal(id uint, topic, body string, fontHeading, fontSubheading, fontBody, fontMono *string, imageUrls []string) (*model.Journal, error) {
+func UpdateJournal(id uint, topic, body string, fontHeading, fontSubheading, fontBody, fontMono *string, imageUrls []string, metrics *service.JournalMetrics) (*model.Journal, error) {
 	var journal model.Journal
 	if err := db.DB.First(&journal, id).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -124,6 +124,16 @@ func UpdateJournal(id uint, topic, body string, fontHeading, fontSubheading, fon
 	journal.FontSubheading = fontSubheading
 	journal.FontBody = fontBody
 	journal.FontMono = fontMono
+
+	if metrics != nil {
+		journal.MoodScore = metrics.MoodScore
+		journal.AnxietyLevel = metrics.AnxietyLevel
+		journal.SleepQuality = metrics.SleepQuality
+		journal.Condition = metrics.Condition
+		journal.PrimaryEmotion = metrics.PrimaryEmotion
+		journal.Triggers = metrics.Triggers
+		journal.SummaryText = metrics.SummaryText
+	}
 
 	if err := tx.Save(&journal).Error; err != nil {
 		tx.Rollback()

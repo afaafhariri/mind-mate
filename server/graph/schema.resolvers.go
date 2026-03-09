@@ -234,6 +234,17 @@ func (r *mutationResolver) UpdateJournal(ctx context.Context, id string, input m
 		imageUrls = input.ImageUrls
 	}
 
+	var metrics *service.JournalMetrics
+	if r.RAGService != nil {
+		textForMetrics := fmt.Sprintf("Topic: %s\nBody: %s", input.Topic, input.Body)
+		extMetrics, err := r.RAGService.ExtractJournalMetrics(ctx, textForMetrics)
+		if err == nil {
+			metrics = extMetrics
+		} else {
+			log.Printf("Failed to extract journal metrics on update: %v", err)
+		}
+	}
+
 	journal, err := repository.UpdateJournal(
 		journalID,
 		input.Topic,
@@ -243,9 +254,25 @@ func (r *mutationResolver) UpdateJournal(ctx context.Context, id string, input m
 		input.FontBody,
 		input.FontMono,
 		imageUrls,
+		metrics,
 	)
 	if err != nil {
 		return nil, err
+	}
+
+	// Re-generate embedding asynchronously
+	if r.RAGService != nil {
+		go func() {
+			text := fmt.Sprintf("Topic: %s\nBody: %s", journal.Topic, journal.Body)
+			embedding, err := r.RAGService.GenerateEmbedding(context.Background(), text)
+			if err != nil {
+				log.Printf("Failed to generate embedding for journal %d: %v", journal.ID, err)
+				return
+			}
+			if err := repository.UpdateJournalEmbedding(journal.ID, embedding); err != nil {
+				log.Printf("Failed to save embedding for journal %d: %v", journal.ID, err)
+			}
+		}()
 	}
 
 	return convertJournalToGraphQL(journal), nil

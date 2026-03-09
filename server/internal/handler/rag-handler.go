@@ -5,6 +5,7 @@ import (
 	"mind-mate-server/internal/repository"
 	"mind-mate-server/internal/service"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -149,7 +150,7 @@ func (h *RAGHandler) PatternRecognition(c *gin.Context) {
 		avgSleep /= count
 	}
 
-	analysis := "Based on your recent data, your average anxiety level is " + string(rune('0'+avgAnxiety)) + "/10 and average sleep quality is " + string(rune('0'+avgSleep)) + "/10. "
+	analysis := "Based on your recent data, your average anxiety level is " + strconv.Itoa(avgAnxiety) + "/10 and average sleep quality is " + strconv.Itoa(avgSleep) + "/10. "
 
 	if len(triggerMap) > 0 {
 		analysis += "Common triggers include: "

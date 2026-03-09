@@ -48,10 +48,17 @@ func convertJournalToGraphQL(j *dbmodel.Journal) *model.Journal {
 	createdAt := j.CreatedAt.Format(time.RFC3339)
 	updatedAt := j.UpdatedAt.Format(time.RFC3339)
 
+	moodScore := int32(j.MoodScore)
+	anxietyLevel := int32(j.AnxietyLevel)
+	sleepQuality := int32(j.SleepQuality)
+
 	return &model.Journal{
 		ID:           id,
 		Topic:        j.Topic,
 		Body:         j.Body,
+		MoodScore:    &moodScore,
+		AnxietyLevel: &anxietyLevel,
+		SleepQuality: &sleepQuality,
 		FontSettings: fontSettings,
 		Images:       images,
 		CreatedAt:    createdAt,
